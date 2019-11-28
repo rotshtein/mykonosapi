@@ -54,6 +54,7 @@
 /******************************************************************************/
 #ifdef ALTERA_PLATFORM
 
+#define DVBS_2x_MOD_BASE		0x6000
 #define GPIO_OFFSET				0                                                        // Need to check how this is used 
 
 #define GPIO_DEVICE_ID			0

@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\app\dvbs2x.c" />
     <ClCompile Include="src\app\headless.c" />
     <ClCompile Include="src\app\myk.c" />
     <ClCompile Include="src\app\myk_ad9528init.c" />
@@ -60,6 +61,7 @@
     <ClCompile Include="src\system.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\app\dvbs2x.h" />
     <ClInclude Include="src\app\myk.h" />
     <ClInclude Include="src\app\sin.h" />
     <ClInclude Include="src\devices\ad9528\ad9528.h" />

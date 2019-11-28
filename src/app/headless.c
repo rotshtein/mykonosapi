@@ -63,6 +63,7 @@
 #include "axi_dmac.h"
 
 #include "sin.h"
+#include "dvbs2x.h"
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
@@ -886,7 +887,7 @@ int main(void)
 	printf("Done\n");
 	//uint8_t pllLockStatus;
 	sin_rx(&mykDevice, &pllLockStatus);
-
+	dvbs2x_init();
 	return 0;
 
 error_11:

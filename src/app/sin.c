@@ -23,7 +23,7 @@ void sin_rx(mykonosDevice_t *mykDevice, uint8_t pllLockStatus)
 		errorString = gettheAD9371ErrorMessage(mykError);
 	}
 
-	if ((mykError = MYKONOS_setRfPllFrequency(mykDevice, TX_PLL, 1234000000)) != MYKONOS_ERR_OK)
+	if ((mykError = MYKONOS_setRfPllFrequency(mykDevice, TX_PLL, 1500000000)) != MYKONOS_ERR_OK)
 	{
 		/*** < Info: errorString will contain log error string in order to debug failure > ***/
 		errorString = gettheAD9371ErrorMessage(mykError);

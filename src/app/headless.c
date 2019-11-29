@@ -865,10 +865,13 @@ int main(void)
 		axi_jesd204_rx_laneinfo_read(rx_os_jesd, i);
 
 	/* Initialize the DAC DDS */
-	//axi_dac_init(&tx_dac, &tx_dac_init); $$$URI
+	axi_dac_init(&tx_dac, &tx_dac_init);
+
+	axi_dac_set_datasel(tx_dac, -1, AXI_DAC_DATA_SEL_DMA); // ALL_CHANNELS
+	//axi_dac_set_datasel(tx_dac, 1, AXI_DAC_DATA_SEL_DMA);
 
 	/* Initialize the ADC core */
-	//axi_adc_init(&rx_adc, &rx_adc_init); $$$URI
+	axi_adc_init(&rx_adc, &rx_adc_init);
 
 	mdelay(1000);
 

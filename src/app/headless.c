@@ -86,10 +86,10 @@ int main(void)
 	uint8_t arm_release;
 	mykonosGpioErr_t mykGpioErr;
 	uint32_t initCalMask = TX_BB_FILTER | ADC_TUNER | TIA_3DB_CORNER | DC_OFFSET |
-			       TX_ATTENUATION_DELAY | RX_GAIN_DELAY | FLASH_CAL |
-			       PATH_DELAY | TX_LO_LEAKAGE_INTERNAL | TX_QEC_INIT |
-			       LOOPBACK_RX_LO_DELAY | LOOPBACK_RX_RX_QEC_INIT |
-			       RX_LO_DELAY | RX_QEC_INIT ;
+		TX_ATTENUATION_DELAY | RX_GAIN_DELAY | FLASH_CAL |
+		PATH_DELAY | TX_LO_LEAKAGE_INTERNAL | TX_QEC_INIT |
+		LOOPBACK_RX_LO_DELAY | LOOPBACK_RX_RX_QEC_INIT |
+		RX_LO_DELAY | RX_QEC_INIT;
 	uint8_t errorFlag = 0;
 	uint8_t errorCode = 0;
 	uint32_t initCalsCompleted;
@@ -97,7 +97,7 @@ int main(void)
 	uint8_t obsFramerStatus;
 	uint8_t deframerStatus;
 	uint32_t trackingCalMask = TRACK_ORX1_QEC | TRACK_ORX2_QEC | TRACK_RX1_QEC |
-				   TRACK_RX2_QEC | TRACK_TX1_QEC | TRACK_TX2_QEC;
+		TRACK_RX2_QEC | TRACK_TX1_QEC | TRACK_TX2_QEC;
 	uint32_t status;
 	int32_t ret;
 #ifdef ALTERA_PLATFORM
@@ -140,16 +140,16 @@ int main(void)
 	struct axi_clkgen *rx_os_clkgen;
 #endif
 	uint32_t rx_lane_rate_khz = mykDevice.rx->rxProfile->iqRate_kHz *
-				    mykDevice.rx->framer->M * (20 /
-						    hweight8(mykDevice.rx->framer->serializerLanesEnabled));
+		mykDevice.rx->framer->M * (20 /
+			hweight8(mykDevice.rx->framer->serializerLanesEnabled));
 	uint32_t rx_div40_rate_hz = rx_lane_rate_khz * (1000 / 40);
 	uint32_t tx_lane_rate_khz = mykDevice.tx->txProfile->iqRate_kHz *
-				    mykDevice.tx->deframer->M * (20 /
-						    hweight8(mykDevice.tx->deframer->deserializerLanesEnabled));
+		mykDevice.tx->deframer->M * (20 /
+			hweight8(mykDevice.tx->deframer->deserializerLanesEnabled));
 	uint32_t tx_div40_rate_hz = tx_lane_rate_khz * (1000 / 40);
 	uint32_t rx_os_lane_rate_khz = mykDevice.obsRx->orxProfile->iqRate_kHz *
-				       mykDevice.obsRx->framer->M * (20 /
-						       hweight8(mykDevice.obsRx->framer->serializerLanesEnabled));
+		mykDevice.obsRx->framer->M * (20 /
+			hweight8(mykDevice.obsRx->framer->serializerLanesEnabled));
 	uint32_t rx_os_div40_rate_hz = rx_os_lane_rate_khz * (1000 / 40);
 	struct jesd204_rx_init rx_jesd_init = {
 		"rx_jesd",
@@ -255,7 +255,7 @@ int main(void)
 		4,
 	};
 	struct axi_dac *tx_dac;
-	printf("OOOOOOOOOOOOOOOOOpsssssssss............RX_CORE_BASEADDR, = %d\n",	RX_CORE_BASEADDR);
+	printf("OOOOOOOOOOOOOOOOOpsssssssss............RX_CORE_BASEADDR, = %d\n", RX_CORE_BASEADDR);
 	struct axi_adc_init rx_adc_init = {
 		"rx_adc",
 		RX_CORE_BASEADDR,
@@ -296,9 +296,9 @@ int main(void)
 	}
 
 	error = AD9528_initDeviceDataStruct(clockAD9528_device,
-					    clockAD9528_device->pll1Settings->vcxo_Frequency_Hz,
-					    clockAD9528_device->pll1Settings->refA_Frequency_Hz,
-					    clockAD9528_device->outputSettings->outFrequency_Hz[1]);
+		clockAD9528_device->pll1Settings->vcxo_Frequency_Hz,
+		clockAD9528_device->pll1Settings->refA_Frequency_Hz,
+		clockAD9528_device->outputSettings->outFrequency_Hz[1]);
 	if (error != ADIERR_OK) {
 		printf("AD9528_initDeviceDataStruct() failed\n");
 		error = ADIERR_FAILED;
@@ -313,51 +313,51 @@ int main(void)
 #ifdef ALTERA_PLATFORM
 	/* Initialize A10 FPLLs */
 	status = altera_a10_fpll_init(&rx_device_clk_pll,
-				      &rx_device_clk_pll_init);
+		&rx_device_clk_pll_init);
 	if (status != SUCCESS) {
 		printf("error: %s: altera_a10_fpll_init() failed\n",
-		       rx_os_device_clk_pll_init.name);
+			rx_os_device_clk_pll_init.name);
 		goto error_1;
 	}
 	status = altera_a10_fpll_init(&tx_device_clk_pll,
-				      &tx_device_clk_pll_init);
+		&tx_device_clk_pll_init);
 	if (status != SUCCESS) {
 		printf("error: %s: altera_a10_fpll_init() failed\n",
-		       rx_os_device_clk_pll_init.name);
+			rx_os_device_clk_pll_init.name);
 		goto error_2;
 	}
 	status = altera_a10_fpll_init(&rx_os_device_clk_pll,
-				      &rx_os_device_clk_pll_init);
+		&rx_os_device_clk_pll_init);
 	if (status != SUCCESS) {
 		printf("error: %s: altera_a10_fpll_init() failed\n",
-		       rx_os_device_clk_pll_init.name);
+			rx_os_device_clk_pll_init.name);
 		goto error_3;
 	}
 
 	altera_a10_fpll_disable(rx_device_clk_pll);
 	status = altera_a10_fpll_set_rate(rx_device_clk_pll,
-					  rx_div40_rate_hz);
+		rx_div40_rate_hz);
 	if (status != SUCCESS) {
 		printf("error: %s: altera_a10_fpll_set_rate() failed\n",
-		       rx_device_clk_pll->name);
+			rx_device_clk_pll->name);
 		goto error_4;
 	}
 	altera_a10_fpll_enable(rx_device_clk_pll);
 	altera_a10_fpll_disable(tx_device_clk_pll);
 	status = altera_a10_fpll_set_rate(tx_device_clk_pll,
-					  tx_div40_rate_hz);
+		tx_div40_rate_hz);
 	if (status != SUCCESS) {
 		printf("error: %s: altera_a10_fpll_set_rate() failed\n",
-		       tx_device_clk_pll->name);
+			tx_device_clk_pll->name);
 		goto error_4;
 	}
 	altera_a10_fpll_enable(tx_device_clk_pll);
 	altera_a10_fpll_disable(rx_os_device_clk_pll);
 	status = altera_a10_fpll_set_rate(rx_os_device_clk_pll,
-					  rx_os_div40_rate_hz);
+		rx_os_div40_rate_hz);
 	if (status != SUCCESS) {
 		printf("error: %s: altera_a10_fpll_set_rate() failed\n",
-		       rx_os_device_clk_pll->name);
+			rx_os_device_clk_pll->name);
 		goto error_4;
 	}
 	altera_a10_fpll_enable(rx_os_device_clk_pll);
@@ -451,7 +451,7 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykError = MYKONOS_checkPllsLockStatus(&mykDevice,
-			&pllLockStatus)) != MYKONOS_ERR_OK) {
+		&pllLockStatus)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -461,7 +461,7 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykError = MYKONOS_enableMultichipSync(&mykDevice, 1,
-			&mcsStatus)) != MYKONOS_ERR_OK) {
+		&mcsStatus)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -482,7 +482,7 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykError = MYKONOS_enableMultichipSync(&mykDevice, 0,
-			&mcsStatus)) != MYKONOS_ERR_OK) {
+		&mcsStatus)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -504,11 +504,12 @@ int main(void)
 		}
 
 		if ((mykError = MYKONOS_loadArmFromBinary(&mykDevice,
-				&firmware_Mykonos_M3_bin[0], firmware_Mykonos_M3_bin_len)) != MYKONOS_ERR_OK) {
+			&firmware_Mykonos_M3_bin[0], firmware_Mykonos_M3_bin_len)) != MYKONOS_ERR_OK) {
 			errorString = getMykonosErrorMessage(mykError);
 			goto error_11;
 		}
-	} else {
+	}
+	else {
 		printf("CLKPLL not locked (0x%x)\n", pllLockStatus);
 		error = ADIERR_FAILED;
 		goto error_2;
@@ -516,7 +517,7 @@ int main(void)
 
 	/* Read back the version of the ARM binary loaded into the Mykonos ARM memory */
 	if ((mykError = MYKONOS_getArmVersion(&mykDevice, &arm_major, &arm_minor,
-					      &arm_release, NULL)) == MYKONOS_ERR_OK)
+		&arm_release, NULL)) == MYKONOS_ERR_OK)
 		printf("AD9371 ARM version %d.%d.%d\n", arm_major, arm_minor, arm_release);
 
 	/*************************************************************************/
@@ -526,19 +527,19 @@ int main(void)
 	//mykDevice.rx->rxPllLoFrequency_Hz = 1234000000; //$$$IGAL
 
 	if ((mykError = MYKONOS_setRfPllFrequency(&mykDevice, RX_PLL,
-			mykDevice.rx->rxPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
+		mykDevice.rx->rxPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_setRfPllFrequency(&mykDevice, TX_PLL,
-			mykDevice.tx->txPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
+		mykDevice.tx->txPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_setRfPllFrequency(&mykDevice, SNIFFER_PLL,
-			mykDevice.obsRx->snifferPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
+		mykDevice.obsRx->snifferPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -547,7 +548,7 @@ int main(void)
 	mdelay(200);
 
 	if ((mykError = MYKONOS_checkPllsLockStatus(&mykDevice,
-			&pllLockStatus)) != MYKONOS_ERR_OK) {
+		&pllLockStatus)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -565,25 +566,25 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykGpioErr = MYKONOS_setRx1GainCtrlPin(&mykDevice, 0, 0, 0, 0,
-			  0)) != MYKONOS_ERR_GPIO_OK) {
+		0)) != MYKONOS_ERR_GPIO_OK) {
 		errorString = getGpioMykonosErrorMessage(mykGpioErr);
 		goto error_11;
 	}
 
 	if ((mykGpioErr = MYKONOS_setRx2GainCtrlPin(&mykDevice, 0, 0, 0, 0,
-			  0)) != MYKONOS_ERR_GPIO_OK) {
+		0)) != MYKONOS_ERR_GPIO_OK) {
 		errorString = getGpioMykonosErrorMessage(mykGpioErr);
 		goto error_11;
 	}
 
 	if ((mykGpioErr = MYKONOS_setTx1AttenCtrlPin(&mykDevice, 0, 0, 0, 0,
-			  0)) != MYKONOS_ERR_GPIO_OK) {
+		0)) != MYKONOS_ERR_GPIO_OK) {
 		errorString = getGpioMykonosErrorMessage(mykGpioErr);
 		goto error_11;
 	}
 
 	if ((mykGpioErr = MYKONOS_setTx2AttenCtrlPin(&mykDevice, 0, 0, 0,
-			  0)) != MYKONOS_ERR_GPIO_OK) {
+		0)) != MYKONOS_ERR_GPIO_OK) {
 		errorString = getGpioMykonosErrorMessage(mykGpioErr);
 		goto error_11;
 	}
@@ -608,31 +609,31 @@ int main(void)
 	}
 
 	if ((mykError = MYKONOS_setObsRxManualGain(&mykDevice, OBS_RX1_TXLO,
-			255)) != MYKONOS_ERR_OK) {
+		255)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_setObsRxManualGain(&mykDevice, OBS_RX2_TXLO,
-			255)) != MYKONOS_ERR_OK) {
+		255)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_setObsRxManualGain(&mykDevice, OBS_SNIFFER_A,
-			255)) != MYKONOS_ERR_OK) {
+		255)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_setObsRxManualGain(&mykDevice, OBS_SNIFFER_B,
-			255)) != MYKONOS_ERR_OK) {
+		255)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_setObsRxManualGain(&mykDevice, OBS_SNIFFER_C,
-			255)) != MYKONOS_ERR_OK) {
+		255)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -656,13 +657,13 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykError = MYKONOS_runInitCals(&mykDevice,
-					    (initCalMask & ~TX_LO_LEAKAGE_EXTERNAL))) != MYKONOS_ERR_OK) {
+		(initCalMask & ~TX_LO_LEAKAGE_EXTERNAL))) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_waitInitCals(&mykDevice, 60000, &errorFlag,
-					     &errorCode)) != MYKONOS_ERR_OK) {
+		&errorCode)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -670,13 +671,14 @@ int main(void)
 	if ((errorFlag != 0) || (errorCode != 0)) {
 		/*** < Info: abort init cals > ***/
 		if ((mykError = MYKONOS_abortInitCals(&mykDevice,
-						      &initCalsCompleted)) != MYKONOS_ERR_OK) {
+			&initCalsCompleted)) != MYKONOS_ERR_OK) {
 			errorString = getMykonosErrorMessage(mykError);
 			goto error_11;
 		}
 		if (initCalsCompleted)
 			printf("Completed calibrations: %x\n", (unsigned int)initCalsCompleted);
-	} else
+	}
+	else
 		printf("Calibrations completed successfully\n");
 
 	/*************************************************************************/
@@ -686,13 +688,13 @@ int main(void)
 	/* Please ensure PA is enabled operational at this time */
 	if (initCalMask & TX_LO_LEAKAGE_EXTERNAL) {
 		if ((mykError = MYKONOS_runInitCals(&mykDevice,
-						    TX_LO_LEAKAGE_EXTERNAL)) != MYKONOS_ERR_OK) {
+			TX_LO_LEAKAGE_EXTERNAL)) != MYKONOS_ERR_OK) {
 			errorString = getMykonosErrorMessage(mykError);
 			goto error_11;
 		}
 
 		if ((mykError = MYKONOS_waitInitCals(&mykDevice, 60000, &errorFlag,
-						     &errorCode)) != MYKONOS_ERR_OK) {
+			&errorCode)) != MYKONOS_ERR_OK) {
 			errorString = getMykonosErrorMessage(mykError);
 			goto error_11;
 		}
@@ -700,11 +702,12 @@ int main(void)
 		if ((errorFlag != 0) || (errorCode != 0)) {
 			/*** < Info: abort init cals > ***/
 			if ((mykError = MYKONOS_abortInitCals(&mykDevice,
-							      &initCalsCompleted)) != MYKONOS_ERR_OK) {
+				&initCalsCompleted)) != MYKONOS_ERR_OK) {
 				errorString = getMykonosErrorMessage(mykError);
 				goto error_11;
 			}
-		} else
+		}
+		else
 			printf("External LOL Calibrations completed successfully\n");
 	}
 
@@ -713,7 +716,7 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykError = MYKONOS_enableSysrefToRxFramer(&mykDevice,
-			1)) != MYKONOS_ERR_OK) {
+		1)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -721,7 +724,7 @@ int main(void)
 	 * transmitting CGS from the RxFramer> ***/
 
 	if ((mykError = MYKONOS_enableSysrefToObsRxFramer(&mykDevice,
-			1)) != MYKONOS_ERR_OK) {
+		1)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -729,7 +732,7 @@ int main(void)
 	 * transmitting CGS from the ObsRxFramer> ***/
 
 	if ((mykError = MYKONOS_enableSysrefToDeframer(&mykDevice,
-			0)) != MYKONOS_ERR_OK) {
+		0)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -749,7 +752,7 @@ int main(void)
 	axi_jesd204_tx_lane_clk_enable(tx_jesd);
 
 	if ((mykError = MYKONOS_enableSysrefToDeframer(&mykDevice,
-			1)) != MYKONOS_ERR_OK) {
+		1)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -794,17 +797,19 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykError = MYKONOS_readRxFramerStatus(&mykDevice,
-			&framerStatus)) != MYKONOS_ERR_OK) {
+		&framerStatus)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
-	} else if (framerStatus != 0x3E)
+	}
+	else if (framerStatus != 0x3E)
 		printf("RxFramerStatus = 0x%x\n", framerStatus);
 
 	if ((mykError = MYKONOS_readOrxFramerStatus(&mykDevice,
-			&obsFramerStatus)) != MYKONOS_ERR_OK) {
+		&obsFramerStatus)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
-	} else if (obsFramerStatus != 0x3E)
+	}
+	else if (obsFramerStatus != 0x3E)
 		printf("OrxFramerStatus = 0x%x\n", obsFramerStatus);
 
 	/*************************************************************************/
@@ -812,10 +817,11 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykError = MYKONOS_readDeframerStatus(&mykDevice,
-			&deframerStatus)) != MYKONOS_ERR_OK) {
+		&deframerStatus)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
-	} else if (deframerStatus != 0x28)
+	}
+	else if (deframerStatus != 0x28)
 		printf("DeframerStatus = 0x%x\n", deframerStatus);
 
 	/*************************************************************************/
@@ -823,16 +829,16 @@ int main(void)
 	/*************************************************************************/
 
 	if ((mykError = MYKONOS_enableTrackingCals(&mykDevice,
-			trackingCalMask)) != MYKONOS_ERR_OK) {
+		trackingCalMask)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	/*** < Info: Allow Rx1/2 QEC tracking and Tx1/2 QEC tracking to run when in the radioOn state
-	     *  Tx calibrations will only run if radioOn and the obsRx path is set to OBS_INTERNAL_CALS > ***/
+		 *  Tx calibrations will only run if radioOn and the obsRx path is set to OBS_INTERNAL_CALS > ***/
 
-	/*** < Info: Function to turn radio on, Enables transmitters and receivers
-	 * that were setup during MYKONOS_initialize() > ***/
+		 /*** < Info: Function to turn radio on, Enables transmitters and receivers
+		  * that were setup during MYKONOS_initialize() > ***/
 	if ((mykError = MYKONOS_radioOn(&mykDevice)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
@@ -840,12 +846,12 @@ int main(void)
 
 	/*** < Info: Allow TxQEC to run when User: is not actively using ORx receive path > ***/
 	if ((mykError = MYKONOS_setObsRxPathSource(&mykDevice,
-			OBS_RXOFF)) != MYKONOS_ERR_OK) {
+		OBS_RXOFF)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 	if ((mykError = MYKONOS_setObsRxPathSource(&mykDevice,
-			OBS_INTERNALCALS)) != MYKONOS_ERR_OK) {
+		OBS_INTERNALCALS)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -867,8 +873,9 @@ int main(void)
 	/* Initialize the DAC DDS */
 	axi_dac_init(&tx_dac, &tx_dac_init);
 
-	axi_dac_set_datasel(tx_dac, -1, AXI_DAC_DATA_SEL_DMA); // ALL_CHANNELS
-	//axi_dac_set_datasel(tx_dac, 1, AXI_DAC_DATA_SEL_DMA);
+	//axi_dac_set_datasel(tx_dac, -1, AXI_DAC_DATA_SEL_DMA); // ALL_CHANNELS
+	axi_dac_set_datasel(tx_dac, 0, AXI_DAC_DATA_SEL_DMA);
+	axi_dac_set_datasel(tx_dac, 1, AXI_DAC_DATA_SEL_DMA);
 
 	/* Initialize the ADC core */
 	axi_adc_init(&rx_adc, &rx_adc_init);
@@ -882,8 +889,8 @@ int main(void)
 
 #if (DDR_MEM_BASEADDR != 0)
 	axi_dmac_transfer(rx_dmac,
-			  DDR_MEM_BASEADDR + 0x800000,
-			  16384 * 8);
+		DDR_MEM_BASEADDR + 0x800000,
+		16384 * 8);
 #else
 	printf("Skipping DMA initialaztion (no ddr on board)\n");
 #endif
@@ -896,41 +903,41 @@ int main(void)
 error_11:
 	printf("%s", errorString);
 #ifndef ALTERA_PLATFORM
-error_10:
+	error_10 :
 #endif
 #if (RX_CORE_BASEADDR != 0)
-	adxcvr_remove(rx_os_adxcvr);
-error_9:
-	adxcvr_remove(tx_adxcvr);
-error_8:
-	adxcvr_remove(rx_adxcvr);
+			 adxcvr_remove(rx_os_adxcvr);
+		 error_9:
+			 adxcvr_remove(tx_adxcvr);
+		 error_8:
+			 adxcvr_remove(rx_adxcvr);
 #endif
-error_7:
-	axi_jesd204_rx_remove(rx_os_jesd);
-error_6:
-	axi_jesd204_tx_remove(tx_jesd);
-error_5:
-	axi_jesd204_rx_remove(rx_jesd);
-error_4:
+		 error_7:
+			 axi_jesd204_rx_remove(rx_os_jesd);
+		 error_6:
+			 axi_jesd204_tx_remove(tx_jesd);
+		 error_5:
+			 axi_jesd204_rx_remove(rx_jesd);
+		 error_4:
 #ifdef ALTERA_PLATFORM
-	altera_a10_fpll_remove(rx_os_device_clk_pll);
+			 altera_a10_fpll_remove(rx_os_device_clk_pll);
 #else
-	axi_clkgen_remove(rx_os_clkgen);
+			 axi_clkgen_remove(rx_os_clkgen);
 #endif
-error_3:
+		 error_3:
 #ifdef ALTERA_PLATFORM
-	altera_a10_fpll_remove(tx_device_clk_pll);
+			 altera_a10_fpll_remove(tx_device_clk_pll);
 #else
-	axi_clkgen_remove(tx_clkgen);
+			 axi_clkgen_remove(tx_clkgen);
 #endif
-error_2:
+		 error_2:
 #ifdef ALTERA_PLATFORM
-	altera_a10_fpll_remove(rx_device_clk_pll);
+			 altera_a10_fpll_remove(rx_device_clk_pll);
 #else
-	axi_clkgen_remove(rx_clkgen);
+			 axi_clkgen_remove(rx_clkgen);
 #endif
-error_1:
-	platform_remove();
-error_0:
-	return FAILURE;
+		 error_1:
+			 platform_remove();
+		 error_0:
+			 return FAILURE;
 }

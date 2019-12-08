@@ -40,6 +40,7 @@
 /***************************** Include Files **********************************/
 /******************************************************************************/
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include "common.h"
 #include "ad9528.h"
@@ -69,12 +70,47 @@
 /******************************************************************************/
 extern ad9528Device_t clockAD9528_;
 extern mykonosDevice_t mykDevice;
-
+#define VERSION "1.0"
 /***************************************************************************//**
  * @brief main
 *******************************************************************************/
-int main(void)
+int main(int argc, char * argv[])
 {
+
+	if (argc > 1)
+	{
+		if ((strcmp(argv[1], "-h") == 0))
+		{
+			printf("\nmykonosapi version %s\n", VERSION);
+			printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+			printf("   READ:  ./mykonosapi <address>\n");
+			printf("   Write: ./mykonosapi <address> <value>\n\n");
+		}
+		else
+		{
+			uint32_t reg_addr = (uint32_t)argv[1][1] == 'x' ? (int)strtol(argv[1], NULL, 16) : atoi(argv[1]);
+				switch (argc)
+				{
+				case 2:
+					// Read address
+				{
+					uint32_t reg_val = IORD_32DIRECT(0, reg_addr);
+					printf("Address 0x%X = Value=0x%X\n", reg_addr, reg_val);
+				}
+				break;
+
+				case 3:
+					//Write data to address
+				{
+					uint32_t reg_val = (uint32_t)argv[2][1] == 'x' ? (int)strtol(argv[2], NULL, 16) : atoi(argv[2]);
+					IOWR_32DIRECT(0, reg_addr, reg_val);
+					printf("Value=0x%X ==> Address 0x%X\n", reg_val, reg_addr);
+				}
+				break;
+				}
+		}
+		return (0);
+	}
 	ADI_ERR error;
 	ad9528Device_t *clockAD9528_device = &clockAD9528_;
 	mykonosErr_t mykError;
@@ -564,7 +600,7 @@ int main(void)
 	/*************************************************************************/
 	/*****                Mykonos Set GPIOs                              *****/
 	/*************************************************************************/
-
+#if(0) //$$$URI
 	if ((mykGpioErr = MYKONOS_setRx1GainCtrlPin(&mykDevice, 0, 0, 0, 0,
 		0)) != MYKONOS_ERR_GPIO_OK) {
 		errorString = getGpioMykonosErrorMessage(mykGpioErr);
@@ -588,7 +624,7 @@ int main(void)
 		errorString = getGpioMykonosErrorMessage(mykGpioErr);
 		goto error_11;
 	}
-
+#endif
 	if ((mykGpioErr = MYKONOS_setupGpio(&mykDevice)) != MYKONOS_ERR_GPIO_OK) {
 		errorString = getGpioMykonosErrorMessage(mykGpioErr);
 		goto error_11;

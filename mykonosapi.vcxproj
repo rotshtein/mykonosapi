@@ -58,6 +58,7 @@
     <ClCompile Include="src\devices\mykonos\mykonos_debug\mykonos_dbgjesd.c" />
     <ClCompile Include="src\devices\mykonos\mykonos_gpio.c" />
     <ClCompile Include="src\devices\mykonos\mykonos_user.c" />
+    <ClCompile Include="src\profiles.c" />
     <ClCompile Include="src\system.c" />
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +88,7 @@
     <ClInclude Include="src\devices\mykonos\mykonos_macros.h" />
     <ClInclude Include="src\devices\mykonos\mykonos_user.h" />
     <ClInclude Include="src\devices\mykonos\mykonos_version.h" />
+    <ClInclude Include="src\profiles.h" />
     <ClInclude Include="src\system.h" />
     <ClInclude Include="src\devices\mykonos\t_mykonos.h" />
     <ClInclude Include="src\devices\mykonos\t_mykonos_gpio.h" />

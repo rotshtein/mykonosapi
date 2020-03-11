@@ -15,7 +15,7 @@ void sin_rx(mykonosDevice_t *mykDevice, uint8_t pllLockStatus)
 	}
 
 
-	if ((mykError = MYKONOS_setRfPllFrequency(mykDevice, RX_PLL, 1234000000)) != MYKONOS_ERR_OK)
+	if ((mykError = MYKONOS_setRfPllFrequency(mykDevice, RX_PLL, 1500000000)) != MYKONOS_ERR_OK)
 	{
 		/*** < Info: errorString will
 		contain log error string in order to

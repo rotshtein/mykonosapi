@@ -65,6 +65,10 @@
 
 #include "sin.h"
 #include "dvbs2x.h"
+
+#include <unistd.h> 
+#include "profiles.h"
+
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
@@ -76,9 +80,94 @@ extern mykonosDevice_t mykDevice;
 *******************************************************************************/
 int main(int argc, char * argv[])
 {
+	unsigned int write_addr = 0, read_addr = 0;
+	int value = 0;
+	int profile = 0;
 
 	if (argc > 1)
 	{
+		
+		int opt;
+
+		// put ':' in the starting of the 
+		// string so that program can  
+		//distinguish between '?' and ':'  
+		while ((opt = getopt(argc, argv, ":p:t:r:w:v:hH")) != -1)
+		{
+			extern char *optarg;
+			extern int optopt;
+
+			switch (opt)
+			{
+			case 'r':
+				printf("Reading from address %s\n", optarg);
+				read_addr = (uint32_t)optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(&optarg[2]);
+				break;
+
+			case 'v':
+				printf("Value = %s\n", optarg);
+				value = (uint32_t)optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(&optarg[2]);
+				break;
+
+			case 'w':
+				printf("Writing to address %s\n", optarg);
+				write_addr = (uint32_t)optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(&optarg[2]);
+				break;
+
+			case 'p':
+				profile = atoi(optarg);
+				if ((profile < 0) || (profile > 1))
+				{
+					profile = 0;
+				}
+				break;
+
+			case 't':
+				printf("transmit frequency is not supported yet. [%s Hz]\n", optarg);
+				break;
+
+			case 'h':
+			case 'H':
+				printf("\nmykonosapi version %s\n", VERSION);
+				printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+				printf("   -r <address> \n");
+				printf("   -w <address> \n");
+				printf("   -v <value> \n");
+				printf("           * addresses and vlue can be in decimal or hex with leading 0x\n");
+				printf("\n");
+				printf("   -p <profile 0=384, 1= 1536>                   (0)\n");
+				printf("   -t <transmit frequency in Hz - not supported yet>\n");
+				return 0;
+				break;
+
+			case ':':
+				printf("option needs a value\n");
+				break;
+			case '?':
+				printf("unknown option : %c\n", optopt);
+				break;
+			}
+		}
+
+		
+		if(write_addr != 0)	//Write data to address
+		{
+			IOWR_32DIRECT(0, write_addr, value);
+			printf("Value=0x%X ==> Address 0x%X\n", value, write_addr);
+		}
+
+		if (read_addr != 0)	// Read address
+		{
+			uint32_t reg_val = IORD_32DIRECT(0, read_addr);
+			printf("Address 0x%X = Value=0x%X\n", read_addr, reg_val);
+		}
+
+		if ((write_addr != 0) | (read_addr != 0))
+		{
+			return 0;
+		}
+		
+		/*
 		if ((strcmp(argv[1], "-h") == 0))
 		{
 			printf("\nmykonosapi version %s\n", VERSION);
@@ -109,8 +198,11 @@ int main(int argc, char * argv[])
 				break;
 				}
 		}
-		return (0);
+		return (0);*/
 	}
+
+	change_rx_profile(profile, mykDevice.rx->rxProfile);
+
 	ADI_ERR error;
 	ad9528Device_t *clockAD9528_device = &clockAD9528_;
 	mykonosErr_t mykError;
@@ -308,6 +400,10 @@ int main(int argc, char * argv[])
 	struct axi_dmac *rx_dmac;
 	uint32_t i;
 
+	/*mykonosTempSensorStatus_t tempStatus;
+	mykonosGpioErr_t e = MYKONOS_readTempSensor(&mykDevice, &tempStatus);
+	printf("Temp is: %d", tempStatus.tempCode);
+	*/
 	/* Allocating memory for the errorString */
 	errorString = NULL;
 #endif
@@ -634,12 +730,12 @@ int main(int argc, char * argv[])
 	/*****                Mykonos Set manual gains values                *****/
 	/*************************************************************************/
 
-	if ((mykError = MYKONOS_setRx1ManualGain(&mykDevice, 228)) != MYKONOS_ERR_OK) {
+	if ((mykError = MYKONOS_setRx1ManualGain(&mykDevice, 255)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
-	if ((mykError = MYKONOS_setRx2ManualGain(&mykDevice, 228)) != MYKONOS_ERR_OK) {
+	if ((mykError = MYKONOS_setRx2ManualGain(&mykDevice, 255)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
@@ -917,6 +1013,7 @@ int main(int argc, char * argv[])
 	axi_adc_init(&rx_adc, &rx_adc_init);
 
 	mdelay(1000);
+	
 
 	/* Initialize the DMAC and transfer 16384 samples from ADC to MEM */
 #if (AXI_AD9371_BASE != 0) //$$$URI

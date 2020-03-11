@@ -66,6 +66,7 @@
 #include "sin.h"
 #include "dvbs2x.h"
 
+#include <locale.h>
 #include <string.h>
 #include <unistd.h> 
 #include "profiles.h"
@@ -100,6 +101,7 @@ int main(int argc, char * argv[])
 	unsigned int write_addr = 0, read_addr = 0;
 	int value = 0;
 	int profile = 0;
+	unsigned int tx_frequency = 1e9;
 
 	if (argc > 1)
 	{
@@ -152,7 +154,9 @@ int main(int argc, char * argv[])
 				break;
 
 			case 't':
-				printf("transmit frequency is not supported yet. [%s Hz]\n", optarg);
+				setlocale(LC_NUMERIC, "");
+				tx_frequency = (uint32_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
+				printf("transmit frequency set to %'d [%s Hz]\n", tx_frequency);
 				break;
 
 			case 'h':
@@ -223,6 +227,9 @@ int main(int argc, char * argv[])
 	}
 
 	change_rx_profile(profile, mykDevice.rx->rxProfile);
+
+	mykDevice.tx->txPllUseExternalLo = 0; // Use internal LO
+	mykDevice.tx->txPllLoFrequency_Hz = tx_frequency;
 
 	ADI_ERR error;
 	ad9528Device_t *clockAD9528_device = &clockAD9528_;

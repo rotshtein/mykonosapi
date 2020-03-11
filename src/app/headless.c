@@ -66,6 +66,7 @@
 #include "sin.h"
 #include "dvbs2x.h"
 
+#include <string.h>
 #include <unistd.h> 
 #include "profiles.h"
 
@@ -75,6 +76,22 @@
 extern ad9528Device_t clockAD9528_;
 extern mykonosDevice_t mykDevice;
 #define VERSION "1.0"
+
+
+void print_help()
+{
+	printf("\nmykonosapi version %s\n", VERSION);
+	printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+	printf("   -r <address> \n");
+	printf("   -w <address:value> \n");
+	printf("           * addresses and vlue can be in decimal or hex with leading 0x\n");
+	printf("\n");
+	printf("\n");
+	printf("   -p <profile 0=384, 1= 1536>                   (0)\n");
+	printf("   -t <transmit frequency in Hz - not supported yet>\n");
+}
+
+
 /***************************************************************************//**
  * @brief main
 *******************************************************************************/
@@ -92,7 +109,7 @@ int main(int argc, char * argv[])
 		// put ':' in the starting of the 
 		// string so that program can  
 		//distinguish between '?' and ':'  
-		while ((opt = getopt(argc, argv, ":p:t:r:w:v:hH")) != -1)
+		while ((opt = getopt(argc, argv, ":p:t:r:w:hH")) != -1)
 		{
 			extern char *optarg;
 			extern int optopt;
@@ -104,16 +121,28 @@ int main(int argc, char * argv[])
 				read_addr = (uint32_t)optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(&optarg[2]);
 				break;
 
-			case 'v':
-				printf("Value = %s\n", optarg);
-				value = (uint32_t)optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(&optarg[2]);
-				break;
-
 			case 'w':
-				printf("Writing to address %s\n", optarg);
-				write_addr = (uint32_t)optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(&optarg[2]);
-				break;
-
+				{
+					char * addr = strtok(optarg, ":");
+					if (addr == NULL)
+					{
+						print_help();
+						return 0;
+					}
+					//addr = strtok(NULL, ":");
+					
+					write_addr = (uint32_t)addr[1] == 'x' ? (int)strtol(addr, NULL, 16) : atoi(addr);
+					printf("Writing to address 0x%X\n", write_addr);
+					char * val = strtok(NULL, ":"); //optarg;
+					if (val == NULL)
+					{
+						print_help();
+						return 0;
+					}
+					value = (uint32_t)val[1] == 'x' ? (int)strtol(val, NULL, 16) : atoi(val);
+					printf("Value = 0x%X\n", value);
+					break;
+				}
 			case 'p':
 				profile = atoi(optarg);
 				if ((profile < 0) || (profile > 1))
@@ -128,15 +157,7 @@ int main(int argc, char * argv[])
 
 			case 'h':
 			case 'H':
-				printf("\nmykonosapi version %s\n", VERSION);
-				printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
-				printf("   -r <address> \n");
-				printf("   -w <address> \n");
-				printf("   -v <value> \n");
-				printf("           * addresses and vlue can be in decimal or hex with leading 0x\n");
-				printf("\n");
-				printf("   -p <profile 0=384, 1= 1536>                   (0)\n");
-				printf("   -t <transmit frequency in Hz - not supported yet>\n");
+				print_help();
 				return 0;
 				break;
 

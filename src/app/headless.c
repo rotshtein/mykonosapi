@@ -90,6 +90,7 @@ void print_help()
 	printf("\n");
 	printf("   -p <profile 0=384, 1= 1536>                   (0)\n");
 	printf("   -t <transmit frequency in Hz - not supported yet>\n");
+	printf("   -a <attenuation [dbM]>\n");
 }
 
 
@@ -102,6 +103,7 @@ int main(int argc, char * argv[])
 	int value = 0;
 	int profile = 0;
 	unsigned int tx_frequency = 1e9;
+	int attenuation = 0;
 
 	if (argc > 1)
 	{
@@ -111,7 +113,7 @@ int main(int argc, char * argv[])
 		// put ':' in the starting of the 
 		// string so that program can  
 		//distinguish between '?' and ':'  
-		while ((opt = getopt(argc, argv, ":p:t:r:w:hH")) != -1)
+		while ((opt = getopt(argc, argv, ":p:t:r:w:a:hH")) != -1)
 		{
 			extern char *optarg;
 			extern int optopt;
@@ -156,7 +158,11 @@ int main(int argc, char * argv[])
 			case 't':
 				setlocale(LC_NUMERIC, "");
 				tx_frequency = (uint32_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
-				printf("transmit frequency set to %'d [%s Hz]\n", tx_frequency);
+				break;
+
+			case 'a':
+				attenuation = (uint32_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
+				
 				break;
 
 			case 'h':
@@ -191,45 +197,20 @@ int main(int argc, char * argv[])
 		{
 			return 0;
 		}
-		
-		/*
-		if ((strcmp(argv[1], "-h") == 0))
-		{
-			printf("\nmykonosapi version %s\n", VERSION);
-			printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
-			printf("   READ:  ./mykonosapi <address>\n");
-			printf("   Write: ./mykonosapi <address> <value>\n\n");
-		}
-		else
-		{
-			uint32_t reg_addr = (uint32_t)argv[1][1] == 'x' ? (int)strtol(argv[1], NULL, 16) : atoi(argv[1]);
-				switch (argc)
-				{
-				case 2:
-					// Read address
-				{
-					uint32_t reg_val = IORD_32DIRECT(0, reg_addr);
-					printf("Address 0x%X = Value=0x%X\n", reg_addr, reg_val);
-				}
-				break;
-
-				case 3:
-					//Write data to address
-				{
-					uint32_t reg_val = (uint32_t)argv[2][1] == 'x' ? (int)strtol(argv[2], NULL, 16) : atoi(argv[2]);
-					IOWR_32DIRECT(0, reg_addr, reg_val);
-					printf("Value=0x%X ==> Address 0x%X\n", reg_val, reg_addr);
-				}
-				break;
-				}
-		}
-		return (0);*/
 	}
 
+	// Set the Rx Profile
 	change_rx_profile(profile, mykDevice.rx->rxProfile);
+	printf("receive profile number: \t%d\n", profile);
 
+	// Set the Tx Frequency
 	mykDevice.tx->txPllUseExternalLo = 0; // Use internal LO
 	mykDevice.tx->txPllLoFrequency_Hz = tx_frequency;
+	printf("transmit: \t\t\t%d [Hz]\n", mykDevice.tx->txPllLoFrequency_Hz);
+
+	// Set the Tx Attenuation
+	mykDevice.tx->tx1Atten_mdB = attenuation;
+	printf("transmit attenuation: \t\t%d [dbM]\n", attenuation);
 
 	ADI_ERR error;
 	ad9528Device_t *clockAD9528_device = &clockAD9528_;

@@ -76,7 +76,7 @@
 /******************************************************************************/
 extern ad9528Device_t clockAD9528_;
 extern mykonosDevice_t mykDevice;
-#define VERSION "1.0"
+#define VERSION "1.1"
 
 
 void print_help()

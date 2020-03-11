@@ -89,8 +89,9 @@ void print_help()
 	printf("\n");
 	printf("\n");
 	printf("   -p <profile 0=384, 1= 1536>                   (0)\n");
-	printf("   -t <transmit frequency in Hz - not supported yet>\n");
-	printf("   -a <attenuation [dbM]>\n");
+	printf("   -t <tx frequency in Hz>                     (1e9)\n");
+	printf("   -f <rc frequency in Hz>                     (1e9)\n");
+	printf("   -a <attenuation [dbM]>                        (0)\n");
 }
 
 
@@ -102,8 +103,9 @@ int main(int argc, char * argv[])
 	unsigned int write_addr = 0, read_addr = 0;
 	int value = 0;
 	int profile = 0;
-	unsigned int tx_frequency = 1e9;
+	uint64_t tx_frequency_Hz = 1e9;
 	int attenuation = 0;
+    uint64_t rx_frequency_Hz = 1e9;
 
 	if (argc > 1)
 	{
@@ -113,7 +115,7 @@ int main(int argc, char * argv[])
 		// put ':' in the starting of the 
 		// string so that program can  
 		//distinguish between '?' and ':'  
-		while ((opt = getopt(argc, argv, ":p:t:r:w:a:hH")) != -1)
+		while ((opt = getopt(argc, argv, ":p:t:f:r:w:a:hH")) != -1)
 		{
 			extern char *optarg;
 			extern int optopt;
@@ -157,7 +159,12 @@ int main(int argc, char * argv[])
 
 			case 't':
 				setlocale(LC_NUMERIC, "");
-				tx_frequency = (uint32_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
+				tx_frequency_Hz = (uint64_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
+				break;
+
+			case 'f':
+				setlocale(LC_NUMERIC, "");
+				rx_frequency_Hz = (uint64_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
 				break;
 
 			case 'a':
@@ -205,8 +212,13 @@ int main(int argc, char * argv[])
 
 	// Set the Tx Frequency
 	mykDevice.tx->txPllUseExternalLo = 0; // Use internal LO
-	mykDevice.tx->txPllLoFrequency_Hz = tx_frequency;
-	printf("transmit: \t\t\t%d [Hz]\n", mykDevice.tx->txPllLoFrequency_Hz);
+	mykDevice.tx->txPllLoFrequency_Hz = tx_frequency_Hz;
+	printf("transmit: \t\t\t%llu [Hz]\n", mykDevice.tx->txPllLoFrequency_Hz);
+
+	// Set the Rx Frequency
+	mykDevice.rx->rxPllUseExternalLo = 0; // Use internal LO
+	mykDevice.rx->rxPllLoFrequency_Hz = rx_frequency_Hz;
+	printf("receive: \t\t\t%llu [Hz]\n", mykDevice.rx->rxPllLoFrequency_Hz);
 
 	// Set the Tx Attenuation
 	mykDevice.tx->tx1Atten_mdB = attenuation;

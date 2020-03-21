@@ -70,7 +70,8 @@
 #include <string.h>
 #include <unistd.h> 
 #include "profiles.h"
-
+#include "profile_384.h"
+#include "profile_1536.h"
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
@@ -100,7 +101,7 @@ void print_help()
 *******************************************************************************/
 int main(int argc, char * argv[])
 {
-	unsigned int write_addr = 0, read_addr = 0;
+	unsigned int write_addr = 0xFFFFFFFF, read_addr = 0xFFFFFFFF;
 	int value = 0;
 	int profile = 0;
 	uint64_t tx_frequency_Hz = 1e9;
@@ -188,40 +189,52 @@ int main(int argc, char * argv[])
 		}
 
 		
-		if(write_addr != 0)	//Write data to address
+		if(write_addr != 0xFFFFFFFF)	//Write data to address
 		{
 			IOWR_32DIRECT(0, write_addr, value);
 			printf("Value=0x%X ==> Address 0x%X\n", value, write_addr);
 		}
 
-		if (read_addr != 0)	// Read address
+		if (read_addr != 0xFFFFFFFF)	// Read address
 		{
 			uint32_t reg_val = IORD_32DIRECT(0, read_addr);
 			printf("Address 0x%X = Value=0x%X\n", read_addr, reg_val);
 		}
 
-		if ((write_addr != 0) | (read_addr != 0))
+		if ((write_addr != 0xFFFFFFFF) | (read_addr != 0xFFFFFFFF))
 		{
 			return 0;
 		}
 	}
 
+
+	mykonosDevice_t * deviceProfile = &mykDevice;
 	// Set the Rx Profile
-	change_rx_profile(profile, mykDevice.rx->rxProfile);
+	//change_rx_profile(profile, deviceProfile->rx->rxProfile);
+	switch (profile)
+	{
+	case 0:
+		deviceProfile = &mykDevice_384;
+		break;
+
+	case 1:
+		deviceProfile = &mykDevice_1536;
+			break;
+	}
 	printf("receive profile number: \t%d\n", profile);
 
 	// Set the Tx Frequency
-	mykDevice.tx->txPllUseExternalLo = 0; // Use internal LO
-	mykDevice.tx->txPllLoFrequency_Hz = tx_frequency_Hz;
-	printf("transmit: \t\t\t%llu [Hz]\n", mykDevice.tx->txPllLoFrequency_Hz);
+	deviceProfile->tx->txPllUseExternalLo = 0; // Use internal LO
+	deviceProfile->tx->txPllLoFrequency_Hz = tx_frequency_Hz;
+	printf("transmit: \t\t\t%llu [Hz]\n", deviceProfile->tx->txPllLoFrequency_Hz);
 
 	// Set the Rx Frequency
-	mykDevice.rx->rxPllUseExternalLo = 0; // Use internal LO
-	mykDevice.rx->rxPllLoFrequency_Hz = rx_frequency_Hz;
-	printf("receive: \t\t\t%llu [Hz]\n", mykDevice.rx->rxPllLoFrequency_Hz);
+	deviceProfile->rx->rxPllUseExternalLo = 0; // Use internal LO
+	deviceProfile->rx->rxPllLoFrequency_Hz = rx_frequency_Hz;
+	printf("receive: \t\t\t%llu [Hz]\n", deviceProfile->rx->rxPllLoFrequency_Hz);
 
 	// Set the Tx Attenuation
-	mykDevice.tx->tx1Atten_mdB = attenuation;
+	deviceProfile->tx->tx1Atten_mdB = attenuation;
 	printf("transmit attenuation: \t\t%d [dbM]\n", attenuation);
 
 	ADI_ERR error;
@@ -288,17 +301,17 @@ int main(int argc, char * argv[])
 	struct axi_clkgen *tx_clkgen;
 	struct axi_clkgen *rx_os_clkgen;
 #endif
-	uint32_t rx_lane_rate_khz = mykDevice.rx->rxProfile->iqRate_kHz *
-		mykDevice.rx->framer->M * (20 /
-			hweight8(mykDevice.rx->framer->serializerLanesEnabled));
+	uint32_t rx_lane_rate_khz = deviceProfile->rx->rxProfile->iqRate_kHz *
+		deviceProfile->rx->framer->M * (20 /
+			hweight8(deviceProfile->rx->framer->serializerLanesEnabled));
 	uint32_t rx_div40_rate_hz = rx_lane_rate_khz * (1000 / 40);
-	uint32_t tx_lane_rate_khz = mykDevice.tx->txProfile->iqRate_kHz *
-		mykDevice.tx->deframer->M * (20 /
-			hweight8(mykDevice.tx->deframer->deserializerLanesEnabled));
+	uint32_t tx_lane_rate_khz = deviceProfile->tx->txProfile->iqRate_kHz *
+		deviceProfile->tx->deframer->M * (20 /
+			hweight8(deviceProfile->tx->deframer->deserializerLanesEnabled));
 	uint32_t tx_div40_rate_hz = tx_lane_rate_khz * (1000 / 40);
-	uint32_t rx_os_lane_rate_khz = mykDevice.obsRx->orxProfile->iqRate_kHz *
-		mykDevice.obsRx->framer->M * (20 /
-			hweight8(mykDevice.obsRx->framer->serializerLanesEnabled));
+	uint32_t rx_os_lane_rate_khz = deviceProfile->obsRx->orxProfile->iqRate_kHz *
+		deviceProfile->obsRx->framer->M * (20 /
+			hweight8(deviceProfile->obsRx->framer->serializerLanesEnabled));
 	uint32_t rx_os_div40_rate_hz = rx_os_lane_rate_khz * (1000 / 40);
 	struct jesd204_rx_init rx_jesd_init = {
 		"rx_jesd",
@@ -343,7 +356,7 @@ int main(int argc, char * argv[])
 		{RX_ADXCFG_0_BASEADDR, RX_ADXCFG_1_BASEADDR, 0, 0},
 		0,
 		rx_lane_rate_khz,
-		mykDevice.clocks->deviceClock_kHz,
+		deviceProfile->clocks->deviceClock_kHz,
 	};
 	struct adxcvr_init tx_adxcvr_init = {
 		"tx_adxcvr",
@@ -351,7 +364,7 @@ int main(int argc, char * argv[])
 		{TX_ADXCFG_0_BASEADDR, TX_ADXCFG_1_BASEADDR, TX_ADXCFG_2_BASEADDR, TX_ADXCFG_3_BASEADDR},
 		TX_PLL_BASEADDR,
 		tx_lane_rate_khz,
-		mykDevice.clocks->deviceClock_kHz,
+		deviceProfile->clocks->deviceClock_kHz,
 	};
 	struct adxcvr_init rx_os_adxcvr_init = {
 		"rx_os_adxcvr",
@@ -359,7 +372,7 @@ int main(int argc, char * argv[])
 		{RX_OS_ADXCFG_0_BASEADDR, RX_OS_ADXCFG_1_BASEADDR, 0, 0},
 		0,
 		rx_os_lane_rate_khz,
-		mykDevice.clocks->deviceClock_kHz,
+		deviceProfile->clocks->deviceClock_kHz,
 	};
 #else
 	struct adxcvr_init rx_adxcvr_init = {
@@ -370,7 +383,7 @@ int main(int argc, char * argv[])
 		1,
 		1,
 		rx_lane_rate_khz,
-		mykDevice.clocks->deviceClock_kHz,
+		deviceProfile->clocks->deviceClock_kHz,
 	};
 	struct adxcvr_init tx_adxcvr_init = {
 		"tx_adxcvr",
@@ -380,7 +393,7 @@ int main(int argc, char * argv[])
 		0,
 		0,
 		tx_lane_rate_khz,
-		mykDevice.clocks->deviceClock_kHz,
+		deviceProfile->clocks->deviceClock_kHz,
 	};
 	struct adxcvr_init rx_os_adxcvr_init = {
 		"rx_os_adxcvr",
@@ -390,7 +403,7 @@ int main(int argc, char * argv[])
 		1,
 		1,
 		rx_os_lane_rate_khz,
-		mykDevice.clocks->deviceClock_kHz,
+		deviceProfile->clocks->deviceClock_kHz,
 	};
 #endif
 #if (RX_CORE_BASEADDR != 0)
@@ -677,22 +690,22 @@ int main(int argc, char * argv[])
 	/*****                Mykonos Set RF PLL Frequencies                 *****/
 	/*************************************************************************/
 
-	//mykDevice.rx->rxPllLoFrequency_Hz = 1234000000; //$$$IGAL
+	//deviceProfile->rx->rxPllLoFrequency_Hz = 1234000000; //$$$IGAL
 
 	if ((mykError = MYKONOS_setRfPllFrequency(&mykDevice, RX_PLL,
-		mykDevice.rx->rxPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
+		deviceProfile->rx->rxPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_setRfPllFrequency(&mykDevice, TX_PLL,
-		mykDevice.tx->txPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
+		deviceProfile->tx->txPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}
 
 	if ((mykError = MYKONOS_setRfPllFrequency(&mykDevice, SNIFFER_PLL,
-		mykDevice.obsRx->snifferPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
+		deviceProfile->obsRx->snifferPllLoFrequency_Hz)) != MYKONOS_ERR_OK) {
 		errorString = getMykonosErrorMessage(mykError);
 		goto error_11;
 	}

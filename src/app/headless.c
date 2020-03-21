@@ -77,7 +77,7 @@
 /******************************************************************************/
 extern ad9528Device_t clockAD9528_;
 extern mykonosDevice_t mykDevice;
-#define VERSION "1.1"
+#define VERSION "1.2"
 
 
 void print_help()
@@ -152,10 +152,10 @@ int main(int argc, char * argv[])
 				}
 			case 'p':
 				profile = atoi(optarg);
-				if ((profile < 0) || (profile > 1))
+				/*if ((profile < 0) || (profile > 1))
 				{
 					profile = 0;
-				}
+				}*/
 				break;
 
 			case 't':
@@ -211,6 +211,7 @@ int main(int argc, char * argv[])
 	//static mykonosDevice_t * deviceProfile = &mykDevice;
 	// Set the Rx Profile
 	//change_rx_profile(profile, mykDevice.rx->rxProfile);
+#if(1)
 	switch (profile)
 	{
 	case 0:
@@ -222,9 +223,12 @@ int main(int argc, char * argv[])
 		//deviceProfile = &mykDevice_1536;
 		memcpy(&mykDevice, &mykDevice_1536, sizeof(mykDevice));
 			break;
+
+	default:
+		break;
 	}
 	printf("receive profile number: \t%d\n", profile);
-
+#endif
 	// Set the Tx Frequency
 	mykDevice.tx->txPllUseExternalLo = 0; // Use internal LO
 	mykDevice.tx->txPllLoFrequency_Hz = tx_frequency_Hz;

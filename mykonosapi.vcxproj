@@ -35,11 +35,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Users\omerm\Desktop\profile 384_ad9528init.c" />
+    <ClCompile Include="..\..\Users\omerm\Desktop\profile_1536_ad9528init.c" />
     <ClCompile Include="src\app\dvbs2x.c" />
     <ClCompile Include="src\app\headless.c" />
     <ClCompile Include="src\app\myk.c" />
     <ClCompile Include="src\app\myk_ad9528init.c" />
+    <ClCompile Include="src\app\profile 384_ad9528init.c" />
     <ClCompile Include="src\app\profile_1536.c" />
+    <ClCompile Include="src\app\profile_1536_ad9528init.c" />
     <ClCompile Include="src\app\profile_384.c" />
     <ClCompile Include="src\app\sin.c" />
     <ClCompile Include="src\devices\ad9528\ad9528.c" />

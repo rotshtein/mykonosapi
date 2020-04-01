@@ -35,8 +35,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Users\omerm\Desktop\profile 384_ad9528init.c" />
-    <ClCompile Include="..\..\Users\omerm\Desktop\profile_1536_ad9528init.c" />
     <ClCompile Include="src\app\dvbs2x.c" />
     <ClCompile Include="src\app\headless.c" />
     <ClCompile Include="src\app\myk.c" />

@@ -128,7 +128,7 @@ int main(int argc, char * argv[])
 			{
 			case 'r':
 				printf("Reading from address %s\n", optarg);
-				read_addr = (uint32_t)optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(&optarg[2]);
+				read_addr = (uint32_t)optarg[1] == 'x' ? (unsigned int)strtoul(optarg, NULL, 16) : (unsigned int)strtoul(optarg,0,10);
 				break;
 
 			case 'w':
@@ -139,9 +139,8 @@ int main(int argc, char * argv[])
 						print_help();
 						return 0;
 					}
-					//addr = strtok(NULL, ":");
 					
-					write_addr = (uint32_t)addr[1] == 'x' ? (int)strtol(addr, NULL, 16) : atoi(addr);
+					write_addr = (uint32_t)addr[1] == 'x' ? (unsigned int)strtoul(addr, NULL, 16) : (unsigned int)strtoul(addr, 0, 10);;
 					printf("Writing to address 0x%X\n", write_addr);
 					char * val = strtok(NULL, ":"); //optarg;
 					if (val == NULL)
@@ -149,7 +148,7 @@ int main(int argc, char * argv[])
 						print_help();
 						return 0;
 					}
-					value = (uint32_t)val[1] == 'x' ? (int)strtol(val, NULL, 16) : atoi(val);
+					value = (uint32_t)val[1] == 'x' ? (unsigned int)strtoul(val, NULL, 16) : (unsigned int)strtoul(val, NULL, 10);
 					printf("Value = 0x%X\n", value);
 					break;
 				}

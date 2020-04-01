@@ -471,7 +471,7 @@ static mykonosAuxIo_t mykonosAuxIo =
 
 static spiSettings_t mykSpiSettings =
 {
-    1, /* chip select index - valid 1~8 */
+    2, /* chip select index - valid 1~8 */
     0, /* the level of the write bit of a SPI write instruction word, value is inverted for SPI read operation */
     1, /* 1 = 16-bit instruction word, 0 = 8-bit instruction word */
     1, /* 1 = MSBFirst, 0 = LSBFirst */

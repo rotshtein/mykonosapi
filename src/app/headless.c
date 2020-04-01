@@ -76,6 +76,9 @@
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
 extern ad9528Device_t clockAD9528_;
+extern ad9528Device_t clockAD9528_384;
+extern ad9528Device_t clockAD9528_1536;
+
 extern mykonosDevice_t mykDevice;
 #define VERSION "1.2"
 
@@ -207,22 +210,21 @@ int main(int argc, char * argv[])
 		}
 	}
 
-
-	//static mykonosDevice_t * deviceProfile = &mykDevice;
-	// Set the Rx Profile
-	//change_rx_profile(profile, mykDevice.rx->rxProfile);
+	ad9528Device_t *clockAD9528_device = &clockAD9528_;
 #if(1)
 	switch (profile)
 	{
 	case 0:
 		//deviceProfile = &mykDevice_384;
 		memcpy(&mykDevice, &mykDevice_384, sizeof(mykDevice));
+		clockAD9528_device = &clockAD9528_384;
 		break;
 
 	case 1:
 		//deviceProfile = &mykDevice_1536;
 		memcpy(&mykDevice, &mykDevice_1536, sizeof(mykDevice));
-			break;
+		clockAD9528_device = &clockAD9528_1536;
+		break;
 
 	default:
 		break;
@@ -244,7 +246,7 @@ int main(int argc, char * argv[])
 	printf("transmit attenuation: \t\t%d [dbM]\n", attenuation);
 
 	ADI_ERR error;
-	ad9528Device_t *clockAD9528_device = &clockAD9528_;
+	
 	mykonosErr_t mykError;
 	const char *errorString;
 	uint8_t pllLockStatus;

@@ -1,19 +1,29 @@
 /* AD9528 data structure initialization file */
+
+/**
+* \page Disclaimer Legal Disclaimer
+* Copyright 2015-2017 Analog Devices Inc.
+* Released under the AD9371 API license, for more information see the "LICENSE.txt" file in this zip file.
+*
+*/
+
+
 #include <stdint.h>
 #include "common.h"
 #include "t_ad9528.h"
 
 static spiSettings_t clockSpiSettings =
 {
-        1, //chip select Index
-        0, //Write bit polarity
-        1, //16bit instruction word
-        1, //MSB first
-        0, //Clock phase
-        0, //Clock polarity
-        0,//uint8_t enSpiStreaming;
-        1,//uint8_t autoIncAddrUp;
-        1 //uint8_t fourWireMode;
+     1,
+     0,
+     1,
+     1,
+     0,
+     0,
+     0,
+     1,
+     1,
+     25000000   
 };
 
 static ad9528pll1Settings_t clockPll1Settings =
@@ -26,38 +36,40 @@ static ad9528pll1Settings_t clockPll1Settings =
     0,
     122880000,
     2,
-    4
+    4,
+    0
 };
 
 static ad9528pll2Settings_t clockPll2Settings =
 {
     3,
+    10,
     30
 };
 
 static ad9528outputSettings_t clockOutputSettings =
 {
-	53237,
+    53237,
     {0,0,0,2,0,0,0,0,0,0,0,0,2,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {10,10,10,10,10,10,10,10,10,10,10,10,10,10},
-    {122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000}
+    {8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+    {0,153600000,0,120000,0,0,0,0,0,0,0,0,120000,153600000}
 };
 
 static ad9528sysrefSettings_t clockSysrefSettings =
 {
-    0,
-    2,
-    0,
-    0,
-    0,
-    0,
-    512
+   0,
+   2,
+   0,
+   0,
+   0,
+   0,
+   512
 };
 
-ad9528Device_t clockAD9528_ =
+ad9528Device_t clockAD9528_1536 =
 {
     &clockSpiSettings,
     &clockPll1Settings,

@@ -11,10 +11,10 @@
  * Cus 153.6Mhz
  * 
  * Profiles:
- * Cus RX 62MHz, Iqrate 153.6MSPS, DEC5
- * Cus TX 70/210MHz, Iqrate 307.2MSPS, DEC5
+ * Cus RX 61MHz, Iqrate 153.6MSPS, DEC5
+ * Cus TX 75/210MHz, Iqrate 307.2MSPS, DEC5
  * Cus ORX 200MHz, Iqrate 307.2MSPS, DEC5
- * 
+ * Cus SNIFFER 20MHz, Iqrate 38.4MSPS, DEC5
  * 
  */
 
@@ -29,7 +29,7 @@
 #include "t_mykonos_gpio.h"
 #include "profile_1536.h"
 
-static int16_t txFirCoefs[] = {-258,201,-60,-284,545,292,-3520,22244,-3520,292,545,-284,-60,201,-258,0};
+static int16_t txFirCoefs[] = {-261,206,-69,-271,527,313,-3543,22268,-3543,313,527,-271,-69,206,-261,0};
 
 static mykonosFir_t txFir =
 {
@@ -38,7 +38,7 @@ static mykonosFir_t txFir =
     &txFirCoefs[0]  /* A pointer to an array of filter coefficients*/
 };
 
-static int16_t rxFirCoefs[] = {-12,9,33,49,-11,-119,-175,-36,270,478,245,-442,-1053,-821,482,1990,2133,-11,-3429,-5241,-2546,5144,14845,21583,21583,14845,5144,-2546,-5241,-3429,-11,2133,1990,482,-821,-1053,-442,245,478,270,-36,-175,-119,-11,49,33,9,-12};
+static int16_t rxFirCoefs[] = {-10,15,34,40,-30,-130,-157,10,307,459,162,-528,-1054,-706,634,2042,2013,-225,-3557,-5159,-2310,5334,14820,21364,21364,14820,5334,-2310,-5159,-3557,-225,2013,2042,634,-706,-1054,-528,162,459,307,10,-157,-130,-30,40,34,15,-10};
 
 static mykonosFir_t rxFir =
 {
@@ -53,6 +53,14 @@ static mykonosFir_t obsrxFir =
     0,              /* Filter gain in dB*/
     24,             /* Number of coefficients in the FIR filter*/
     &obsrxFirCoefs[0]/* A pointer to an array of filter coefficients*/
+};
+
+static int16_t snifferFirCoefs[] = {-2,-2,-1,6,14,14,-5,-36,-58,-37,36,127,158,62,-146,-336,-328,-32,428,726,537,-181,-1036,-1364,-688,821,2242,2378,597,-2473,-4971,-4698,-454,6982,14933,20053,20053,14933,6982,-454,-4698,-4971,-2473,597,2378,2242,821,-688,-1364,-1036,-181,537,726,428,-32,-328,-336,-146,62,158,127,36,-37,-58,-36,-5,14,14,6,-1,-2,-2};
+static mykonosFir_t snifferRxFir=
+{
+    -6,             /* Filter gain in dB*/
+    72,             /* Number of coefficients in the FIR filter*/
+    &snifferFirCoefs[0]/* A pointer to an array of filter coefficients*/
 };
 
 static mykonosJesd204bFramerConfig_t rxFramer =
@@ -153,11 +161,11 @@ static mykonosSnifferGainControl_t snifferGainControl =
 
 static mykonosPeakDetAgcCfg_t rxPeakAgc =
 {
-    0x1A,	/* apdHighThresh: */
-    0x10,	/* apdLowThresh */
+    0x1F,	/* apdHighThresh: */
+    0x16,	/* apdLowThresh */
     0xB5,	/* hb2HighThresh */
-    0x48,	/* hb2LowThresh */
-    0x28,	/* hb2VeryLowThresh */
+    0x80,	/* hb2LowThresh */
+    0x40,	/* hb2VeryLowThresh */
     0x06,	/* apdHighThreshExceededCnt */
     0x04,	/* apdLowThreshExceededCnt */
     0x06,	/* hb2HighThreshExceededCnt */
@@ -180,12 +188,12 @@ static mykonosPowerMeasAgcCfg_t rxPwrAgc =
     0x01,	/* pmdUpperHighThresh */
     0x03,	/* pmdUpperLowThresh */
     0x0C,	/* pmdLowerHighThresh */
-    0x00,	/* pmdLowerLowThresh */
+    0x04,	/* pmdLowerLowThresh */
     0x4,	/* pmdUpperHighGainStepAttack */
     0x2,	/* pmdUpperLowGainStepAttack */
     0x2,	/* pmdLowerHighGainStepRecovery */
     0x4,	/* pmdLowerLowGainStepRecovery */
-    0x08,	/* pmdMeasDuration */
+    0x00,	/* pmdMeasDuration */
     0x02	/* pmdMeasConfig */
 };
 
@@ -200,7 +208,7 @@ static mykonosAgcCfg_t rxAgcConfig =
     1,		/* agcObsRxSelect */
     1,		/* agcPeakThresholdMode */
     1,		/* agcLowThsPreventGainIncrease */
-    0,	/* agcGainUpdateCounter */
+    38396,	/* agcGainUpdateCounter */
     4,	/* agcSlowLoopSettlingDelay */
     2,	/* agcPeakWaitTime */
     1,	/* agcResetOnRxEnable */
@@ -258,7 +266,7 @@ static mykonosAgcCfg_t obsRxAgcConfig =
     1,		/* agcObsRxSelect */
     1,		/* agcPeakThresholdMode */
     1,		/* agcLowThsPreventGainIncrease */
-    0,	/* agcGainUpdateCounter */
+    30720,	/* agcGainUpdateCounter */
     4,		/* agcSlowLoopSettlingDelay */
     2,		/* agcPeakWaitTime */
     1,		/* agcResetOnRxEnable */
@@ -267,10 +275,10 @@ static mykonosAgcCfg_t obsRxAgcConfig =
     &obsRxPwrAgc
 };
 
-static uint16_t rxAdcCustom[]={476,286,190,98,1280,132,1509,63,1575,29,1024,39,48,48,29,186};
+static uint16_t rxAdcCustom[]={477,286,190,98,1280,130,1509,62,1575,29,1024,39,48,48,29,186};
 
 static mykonosRxProfile_t rxProfile =
-{/* RX 62MHz, Iqrate 153.6MSPS, DEC5 */
+{/* RX 61MHz, Iqrate 153.6MSPS, DEC5 */
     1,              /* The divider used to generate the ADC clock*/
     &rxFir,         /* Pointer to Rx FIR filter structure*/
     2,              /* Rx FIR decimation (1,2,4)*/
@@ -278,8 +286,8 @@ static mykonosRxProfile_t rxProfile =
     1,              /* If set, and DEC5 filter used, will use a higher rejection DEC5 FIR filter (1=Enabled, 0=Disabled)*/
     1,              /* RX Half band 1 decimation (1 or 2)*/
     153600,         /* Rx IQ data rate in kHz*/
-    62000000,       /* The Rx RF passband bandwidth for the profile*/
-    62000,          /* Rx BBF 3dB corner in kHz*/
+    61440000,       /* The Rx RF passband bandwidth for the profile*/
+    61440,          /* Rx BBF 3dB corner in kHz*/
     &rxAdcCustom[0] /* pointer to custom ADC profile*/
 };
 static uint16_t orxAdcCustom[]={392,299,180,98,1280,514,1728,570,1638,498,1104,27,48,44,32,200};
@@ -298,10 +306,26 @@ static mykonosRxProfile_t orxProfile =
     &orxAdcCustom[0] /* pointer to custom ADC profile*/
 };
 
+static uint16_t snifferAdcCustom[]={479,285,190,98,1280,112,1505,53,1574,25,1026,40,48,48,29,186};
+
+static mykonosRxProfile_t snifferProfile =
+{ /* SNIFFER 20MHz, Iqrate 38.4MSPS, DEC5 */
+    1,              /* The divider used to generate the ADC clock*/
+    &snifferRxFir,  /* Pointer to Rx FIR filter structure or NULL*/
+    4,              /* Rx FIR decimation (1,2,4)*/
+    5,              /* Decimation of Dec5 or Dec4 filter (5,4)*/
+    0,              /* If set, and DEC5 filter used, will use a higher rejection DEC5 FIR filter (1=Enabled, 0=Disabled)*/
+    2,              /* RX Half band 1 decimation (1 or 2)*/
+    38400,          /* Rx IQ data rate in kHz*/
+    20000000,       /* The Rx RF passband bandwidth for the profile*/
+    20000,          /* Rx BBF 3dB corner in kHz*/
+    &snifferAdcCustom[0] /* pointer to custom ADC profile*/
+};
+
 
 
 static mykonosTxProfile_t txProfile =
-{ /* TX 70/210MHz, Iqrate 307.2MSPS, DEC5 */
+{ /* TX 75/210MHz, Iqrate 307.2MSPS, DEC5 */
     DACDIV_2p5,     /* The divider used to generate the DAC clock*/
     &txFir,         /* Pointer to Tx FIR filter structure*/
     1,              /* The Tx digital FIR filter interpolation (1,2,4)*/
@@ -309,7 +333,7 @@ static mykonosTxProfile_t txProfile =
     1,              /* Tx Halfband2 filter interpolation (1,2)*/
     1,              /* TxInputHbInterpolation (1,2)*/
     307200,         /* Tx IQ data rate in kHz*/
-    70000000,       /* Primary Signal BW*/
+    75000000,       /* Primary Signal BW*/
     210000000,      /* The Tx RF passband bandwidth for the profile*/
     187000,         /* The DAC filter 3dB corner in kHz*/
     105000,         /* Tx BBF 3dB corner in kHz*/
@@ -396,17 +420,17 @@ static mykonosTxSettings_t txSettings =
     NULL            /* VSWR Config Structure. Only valid for AD9373 device, set pointer to NULL otherwise*/
 };
 
-static uint16_t lpbkAdcCustom[]={472,288,190,98,1280,167,1516,81,1577,38,1021,38,48,48,29,186};
+static uint16_t lpbkAdcCustom[]={468,289,191,98,1280,190,1520,93,1578,43,1019,37,48,48,29,185};
 
 static mykonosObsRxSettings_t obsRxSettings =
 {
     &orxProfile,    /* ORx datapath profile, 3dB corner frequencies, and digital filter enables*/
     &orxGainControl,/* ObsRx gain control settings structure*/
     &obsRxAgcConfig,/* ORx AGC control settings structure*/
-    NULL,           /* Sniffer datapath profile, 3dB corner frequencies, and digital filter enables*/
-    NULL,           /* SnRx gain control settings structure*/
+    &snifferProfile,/* Sniffer datapath profile, 3dB corner frequencies, and digital filter enables*/
+    &snifferGainControl,/* SnRx gain control settings structure*/
     &obsRxFramer,   /* ObsRx JESD204b framer configuration structure */
-    (MYK_ORX1_ORX2 | MYK_OBS_RXOFF),/* obsRxChannel */
+    (MYK_ORX1_ORX2 | MYK_SNRXA_B_C),/* obsRxChannel */
     OBSLO_TX_PLL,   /* (obsRxLoSource) The Obs Rx mixer can use the Tx Synth(TX_PLL) or Sniffer Synth (SNIFFER_PLL) */
     1234000000U,    /* SnRx PLL LO frequency in Hz */
     0,              /* Flag to choose if complex baseband or real IF data are selected for Rx and ObsRx paths. Where if > 0 = real IF data, '0' = complex data*/

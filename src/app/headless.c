@@ -1070,8 +1070,8 @@ int main(int argc, char * argv[])
 #endif
 	printf("Done\n");
 	//uint8_t pllLockStatus;
-	sin_rx(&mykDevice, &pllLockStatus);
-	dvbs2x_init();
+	//sin_rx(&mykDevice, &pllLockStatus);
+	//dvbs2x_init();
 	return 0;
 
 error_11:

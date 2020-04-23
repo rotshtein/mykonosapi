@@ -72,6 +72,15 @@
 #include "profiles.h"
 #include "profile_384.h"
 #include "profile_1536.h"
+
+//for knhit
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+int kbhit(void);
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
@@ -1068,7 +1077,64 @@ int main(int argc, char * argv[])
 #else
 	printf("Skipping DMA initialaztion (no ddr on board)\n");
 #endif
-	printf("Done\n");
+	/*************************************************************************/
+	/*****           Sorin - check attenuation                           *****/
+	/*************************************************************************/
+
+	printf("\nSorin [press enter to end test]\n");
+	printf("\tCheck attenuation\n");
+
+	uint16_t tx1Attenuation_mdB;
+	MYKONOS_getTx1Attenuation(&mykDevice, &tx1Attenuation_mdB);
+	printf("\t\tAttenuation = %hu\n", tx1Attenuation_mdB);
+	/*************************************************************************/
+	/*****           Sorin - protect DAC                                 *****/
+	/*************************************************************************/
+	printf("\tSet DAC protection\n");
+	uint16_t	powerThreshold = 4095;
+	uint8_t		attenStepSize = 0;
+	uint8_t		avgDuration = 255;
+	uint8_t		stickyFlagEnable = 0;
+	uint8_t		txAttenControlEnable = 1;
+
+	mykonosErr_t myError = MYKONOS_setupPaProtection(&mykDevice, powerThreshold, attenStepSize, avgDuration, stickyFlagEnable, txAttenControlEnable);
+	
+	printf("\tCheck Status after configuration:\n");
+	uint8_t framerStatus;
+	MYKONOS_readRxFramerStatu(&mykDevice, &framerStatus);
+	printf("\t\tRx Framer Statu = %u\n");
+
+	uint8_t defframerStatus;
+	MYKONOS_readDeframerStatus(&mykDevice, &defframerStatus);
+	printf("\t\tDeframer Statu = %u\n");
+
+	uint8_t mismatch;
+	MYKONOS_jesd204bIlasCheck(&mykDevice, &mismatch);
+	printf("\t\tjesd204bIlasCheck = %u\n");
+
+	
+	printf("\tContinues power meter\n");
+	
+	MYKONOS_enablePaProtection(&mykDevice, 1);
+
+	uint16_t maxPower = 0;
+
+	while (true)
+	{
+		uint16_t channelPower;
+		
+		MYKONOS_getDacPower(&mykDevice, 1, &channelPower);
+		maxPower = maxPower < channelPower ? channelPower : maxPower;
+		printf("\t\tPower = %hu\r", maxPower);
+		sleep(0.1);
+		if (kbhit())
+			break;
+	}
+	
+	printf("\tRemove DAC protection\n");
+	MYKONOS_enablePaProtection(&mykDevice, 0);
+
+	printf("\nDone\n");
 	//uint8_t pllLockStatus;
 	//sin_rx(&mykDevice, &pllLockStatus);
 	//dvbs2x_init();
@@ -1114,4 +1180,31 @@ error_11:
 			 platform_remove();
 		 error_0:
 			 return FAILURE;
+}
+
+int kbhit(void)
+{
+	struct termios oldt, newt;
+	int ch;
+	int oldf;
+
+	tcgetattr(STDIN_FILENO, &oldt);
+	newt = oldt;
+	newt.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+	oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+	ch = getchar();
+
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+	fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+	if (ch != EOF)
+	{
+		ungetc(ch, stdin);
+		return 1;
+	}
+
+	return 0;
 }

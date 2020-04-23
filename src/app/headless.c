@@ -69,7 +69,6 @@
 #include <locale.h>
 #include <string.h>
 #include <unistd.h> 
-#include "profiles.h"
 #include "profile_384.h"
 #include "profile_1536.h"
 
@@ -1100,17 +1099,17 @@ int main(int argc, char * argv[])
 	mykonosErr_t myError = MYKONOS_setupPaProtection(&mykDevice, powerThreshold, attenStepSize, avgDuration, stickyFlagEnable, txAttenControlEnable);
 	
 	printf("\tCheck Status after configuration:\n");
-	uint8_t framerStatus;
-	MYKONOS_readRxFramerStatu(&mykDevice, &framerStatus);
-	printf("\t\tRx Framer Statu = %u\n");
+	uint8_t sframerStatus;
+	MYKONOS_readRxFramerStatus(&mykDevice, &sframerStatus);
+	printf("\t\tRx Framer Statu = %u\n", sframerStatus);
 
-	uint8_t defframerStatus;
-	MYKONOS_readDeframerStatus(&mykDevice, &defframerStatus);
-	printf("\t\tDeframer Statu = %u\n");
+	uint8_t sdefframerStatus;
+	MYKONOS_readDeframerStatus(&mykDevice, &sdefframerStatus);
+	printf("\t\tDeframer Statu = %u\n", sdefframerStatus);
 
-	uint8_t mismatch;
-	MYKONOS_jesd204bIlasCheck(&mykDevice, &mismatch);
-	printf("\t\tjesd204bIlasCheck = %u\n");
+	uint8_t smismatch;
+	MYKONOS_jesd204bIlasCheck(&mykDevice, &smismatch);
+	printf("\t\tjesd204bIlasCheck = %u\n", smismatch);
 
 	
 	printf("\tContinues power meter\n");

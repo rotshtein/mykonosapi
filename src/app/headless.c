@@ -71,6 +71,8 @@
 #include <unistd.h> 
 #include "profile_384.h"
 #include "profile_1536.h"
+#include "profile_wide_0705.h"
+#include "profile_narrow_0705.h"
 
 //for knhit
 #include <stdio.h>
@@ -86,6 +88,9 @@ int kbhit(void);
 extern ad9528Device_t clockAD9528_;
 extern ad9528Device_t clockAD9528_384;
 extern ad9528Device_t clockAD9528_1536;
+extern ad9528Device_t clockAD9528_wide_0705;
+extern ad9528Device_t clockAD9528_narrow_0705;
+
 
 extern mykonosDevice_t mykDevice;
 #define VERSION "1.2"
@@ -100,10 +105,10 @@ void print_help()
 	printf("           * addresses and vlue can be in decimal or hex with leading 0x\n");
 	printf("\n");
 	printf("\n");
-	printf("   -p <profile 0=384, 1= 1536>                   (0)\n");
-	printf("   -t <tx frequency in Hz>                     (1e9)\n");
-	printf("   -f <rc frequency in Hz>                     (1e9)\n");
-	printf("   -a <attenuation [dbM]>                        (0)\n");
+	printf("   -p <profile 0=384, 1=1536, 2 = narrow 705,  3=wide 705>        (0)\n");
+	printf("   -t <tx frequency in Hz>                                        (1e9)\n");
+	printf("   -f <rc frequency in Hz>                                        (1e9)\n");
+	printf("   -a <attenuation [dbM]>                                           (0)\n");
 }
 
 
@@ -231,6 +236,18 @@ int main(int argc, char * argv[])
 		//deviceProfile = &mykDevice_1536;
 		memcpy(&mykDevice, &mykDevice_1536, sizeof(mykDevice));
 		clockAD9528_device = &clockAD9528_1536;
+		break;
+
+	case 2:
+		//deviceProfile = &mykDevice_1536;
+		memcpy(&mykDevice, &mykDevice_narrow_0705, sizeof(mykDevice));
+		clockAD9528_device = &clockAD9528_narrow_0705;
+		break;
+
+	case 3:
+		//deviceProfile = &mykDevice_1536;
+		memcpy(&mykDevice, &mykDevice_wide_705, sizeof(mykDevice));
+		clockAD9528_device = &clockAD9528_wide_0705;
 		break;
 
 	default:

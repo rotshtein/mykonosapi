@@ -224,35 +224,38 @@ int main(int argc, char * argv[])
 
 	ad9528Device_t *clockAD9528_device = &clockAD9528_;
 #if(1)
+	printf("***************************\n");
 	switch (profile)
 	{
 	case 0:
-		//deviceProfile = &mykDevice_384;
 		memcpy(&mykDevice, &mykDevice_384, sizeof(mykDevice));
 		clockAD9528_device = &clockAD9528_384;
+		printf("      Profile: 38.4\n");
 		break;
 
 	case 1:
-		//deviceProfile = &mykDevice_1536;
 		memcpy(&mykDevice, &mykDevice_1536, sizeof(mykDevice));
 		clockAD9528_device = &clockAD9528_1536;
+		printf("      Profile: 153.6\n");
 		break;
 
 	case 2:
-		//deviceProfile = &mykDevice_1536;
 		memcpy(&mykDevice, &mykDevice_narrow_0705, sizeof(mykDevice));
 		clockAD9528_device = &clockAD9528_narrow_0705;
+		printf("      Profile: Narrow 705\n");
 		break;
 
 	case 3:
-		//deviceProfile = &mykDevice_1536;
 		memcpy(&mykDevice, &mykDevice_wide_705, sizeof(mykDevice));
 		clockAD9528_device = &clockAD9528_wide_0705;
+		printf("      Profile: Wide 705\n");
 		break;
 
 	default:
+		printf("      Profile: default (myc.c)\n");
 		break;
 	}
+	printf("***************************\n");
 	printf("receive profile number: \t%d\n", profile);
 #endif
 	// Set the Tx Frequency

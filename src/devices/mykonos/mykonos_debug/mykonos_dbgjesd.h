@@ -24,7 +24,7 @@ extern "C" {
 #include "t_mykonos_gpio.h"
 #include "t_mykonos_dbgjesd.h"
 #include "mykonos_user.h"
-
+#define	MYKONOS_VERBOSE 1
 /*
  *****************************************************************************
  * JESD debug functions

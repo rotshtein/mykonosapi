@@ -14,7 +14,7 @@
 
 static spiSettings_t clockSpiSettings =
 {
-     2,
+        1, //chip select Index
      0,
      1,
      1,
@@ -22,8 +22,7 @@ static spiSettings_t clockSpiSettings =
      0,
      0,
      1,
-     1,
-     25000000   
+        1 //uint8_t fourWireMode;
 };
 
 static ad9528pll1Settings_t clockPll1Settings =
@@ -36,14 +35,12 @@ static ad9528pll1Settings_t clockPll1Settings =
     0,
     122880000,
     2,
-    4,
-    0
+    4
 };
 
 static ad9528pll2Settings_t clockPll2Settings =
 {
     3,
-    10,
     30
 };
 
@@ -55,7 +52,7 @@ static ad9528outputSettings_t clockOutputSettings =
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {10,10,10,10,10,10,10,10,10,10,10,10,10,10},
-    {0,122880000,0,120000,0,0,0,0,0,0,0,0,120000,122880000}
+    {122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000, 122880000}
 };
 
 static ad9528sysrefSettings_t clockSysrefSettings =
@@ -69,7 +66,7 @@ static ad9528sysrefSettings_t clockSysrefSettings =
    512
 };
 
-ad9528Device_t clockAD9528_wide_0705 =
+ad9528Device_t clockAD9528_705wd =
 {
     &clockSpiSettings,
     &clockPll1Settings,

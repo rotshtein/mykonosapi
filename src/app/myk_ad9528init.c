@@ -32,6 +32,7 @@ static ad9528pll1Settings_t clockPll1Settings =
 static ad9528pll2Settings_t clockPll2Settings =
 {
     3,
+	10,
     30
 };
 

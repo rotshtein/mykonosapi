@@ -8,13 +8,13 @@
  * All data structures required for operation have been initialized with values which reflect these settings:
  * 
  * Device Clock:
- * Cus 153.6Mhz
+ * Cus 122.88Mhz
  * 
  * Profiles:
- * Cus RX 20MHz, Iqrate 38.4MSPS, DEC5
- * Cus TX 75/210MHz, Iqrate 307.2MSPS, DEC5
- * Cus ORX 200MHz, Iqrate 307.2MSPS, DEC5
- * Cus SNIFFER 20MHz, Iqrate 38.4MSPS, DEC5
+ * Cus RX 60MHz, Iqrate 122.88MSPS, DEC5
+ * Cus TX 75/200MHz, Iqrate 245.76MSPS, DEC5
+ * Cus ORX 200MHz, Iqrate 245.76MSPS, DEC5
+ * Cus SNIFFER 20MHz, Iqrate 30.72MSPS, DEC5
  * 
  */
 
@@ -27,9 +27,9 @@
 #include <stddef.h>
 #include "t_mykonos.h"
 #include "t_mykonos_gpio.h"
-#include "profile_384.h"
+#include "profile_wide_0705_double.h"
 
-static int16_t txFirCoefs[] = {-261,206,-69,-271,527,313,-3543,22268,-3543,313,527,-271,-69,206,-261,0};
+static int16_t txFirCoefs[] = {141,-277,203,-241,-42,910,-3174,21075,-3174,910,-42,-241,203,-277,141,0};
 
 static mykonosFir_t txFir =
 {
@@ -38,24 +38,24 @@ static mykonosFir_t txFir =
     &txFirCoefs[0]  /* A pointer to an array of filter coefficients*/
 };
 
-static int16_t rxFirCoefs[] = {-2,-2,-1,6,14,14,-5,-36,-58,-37,36,127,158,62,-146,-336,-328,-32,428,726,537,-181,-1036,-1364,-688,821,2242,2378,597,-2473,-4971,-4698,-454,6982,14933,20053,20053,14933,6982,-454,-4698,-4971,-2473,597,2378,2242,821,-688,-1364,-1036,-181,537,726,428,-32,-328,-336,-146,62,158,127,36,-37,-58,-36,-5,14,14,6,-1,-2,-2};
+static int16_t rxFirCoefs[] = {4,8,-6,-32,-26,51,124,34,-219,-314,66,643,572,-495,-1483,-733,1663,2951,391,-4623,-6157,893,14495,25555,25555,14495,893,-6157,-4623,391,2951,1663,-733,-1483,-495,572,643,66,-314,-219,34,124,51,-26,-32,-6,8,4};
 
 static mykonosFir_t rxFir =
 {
     -6,             /* Filter gain in dB*/
-    72,             /* Number of coefficients in the FIR filter*/
+    48,             /* Number of coefficients in the FIR filter*/
     &rxFirCoefs[0]  /* A pointer to an array of filter coefficients*/
 };
 
-static int16_t obsrxFirCoefs[] = {-62,147,-188,22,500,-1359,2233,-2368,656,2432,-9845,24506,24506,-9845,2432,656,-2368,2233,-1359,500,22,-188,147,-62};
+static int16_t obsrxFirCoefs[] = {-289,81,-23,-86,229,-354,397,-233,-657,1699,-4172,23010,-4172,1699,-657,-233,397,-354,229,-86,-23,81,-289,0};
 static mykonosFir_t obsrxFir =
 {
-    0,              /* Filter gain in dB*/
+    6,              /* Filter gain in dB*/
     24,             /* Number of coefficients in the FIR filter*/
     &obsrxFirCoefs[0]/* A pointer to an array of filter coefficients*/
 };
 
-static int16_t snifferFirCoefs[] = {-2,-2,-1,6,14,14,-5,-36,-58,-37,36,127,158,62,-146,-336,-328,-32,428,726,537,-181,-1036,-1364,-688,821,2242,2378,597,-2473,-4971,-4698,-454,6982,14933,20053,20053,14933,6982,-454,-4698,-4971,-2473,597,2378,2242,821,-688,-1364,-1036,-181,537,726,428,-32,-328,-336,-146,62,158,127,36,-37,-58,-36,-5,14,14,6,-1,-2,-2};
+static int16_t snifferFirCoefs[] = {0,2,4,3,-4,-14,-21,-12,17,56,73,39,-53,-159,-198,-101,129,377,457,229,-274,-793,-951,-482,527,1564,1899,1011,-978,-3154,-4109,-2611,1669,7795,13807,17524,17524,13807,7795,1669,-2611,-4109,-3154,-978,1011,1899,1564,527,-482,-951,-793,-274,229,457,377,129,-101,-198,-159,-53,39,73,56,17,-12,-21,-14,-4,3,4,2,0};
 static mykonosFir_t snifferRxFir=
 {
     -6,             /* Filter gain in dB*/
@@ -68,12 +68,12 @@ static mykonosJesd204bFramerConfig_t rxFramer =
     0,              /* JESD204B Configuration Bank ID -extension to Device ID (Valid 0..15)*/
     0,              /* JESD204B Configuration Device ID - link identification number. (Valid 0..255)*/
     0,              /* JESD204B Configuration starting Lane ID.  If more than one lane used, each lane will increment from the Lane0 ID. (Valid 0..31)*/
-    2,              /* number of ADCs (0, 2, or 4) - 2 ADCs per receive chain*/
+    4,              /* number of ADCs (0, 2, or 4) - 2 ADCs per receive chain*/
     32,             /* number of frames in a multiframe (default=32), F*K must be a multiple of 4. (F=2*M/numberOfLanes)*/
     1,              /* scrambling off if framerScramble= 0, if framerScramble>0 scramble is enabled.*/
     1,              /* 0=use internal SYSREF, 1= use external SYSREF*/
     0x03,           /* serializerLanesEnabled - bit per lane, [0] = Lane0 enabled, [1] = Lane1 enabled*/
-    0x04,           /* serializerLaneCrossbar*/
+    0xE4,           /* serializerLaneCrossbar*/
     22,             /* serializerAmplitude - default 22 (valid (0-31)*/
     4,              /* preEmphasis - < default 4 (valid 0 - 7)*/
     0,              /* invertLanePolarity - default 0 ([0] will invert lane [0], bit1 will invert lane1)*/
@@ -96,7 +96,7 @@ static mykonosJesd204bFramerConfig_t obsRxFramer =
     1,              /* scrambling off if framerScramble= 0, if framerScramble>0 scramble is enabled.*/
     1,              /* 0=use internal SYSREF, 1= use external SYSREF*/
     0x0C,           /* serializerLanesEnabled - bit per lane, [0] = Lane0 enabled, [1] = Lane1 enabled*/
-    0x40,           /* Lane crossbar to map framer lane outputs to physical lanes*/
+    0xE4,           /* Lane crossbar to map framer lane outputs to physical lanes*/
     22,             /* serializerAmplitude - default 22 (valid (0-31)*/
     4,              /* preEmphasis - < default 4 (valid 0 - 7)*/
     0,              /* invertLanePolarity - default 0 ([0] will invert lane [0], bit1 will invert lane1)*/
@@ -114,7 +114,7 @@ static mykonosJesd204bDeframerConfig_t deframer =
     0,              /* bankId extension to Device ID (Valid 0..15)*/
     0,              /* deviceId  link identification number. (Valid 0..255)*/
     0,              /* lane0Id Lane0 ID. (Valid 0..31)*/
-    2,              /* M  number of DACss (0, 2, or 4) - 2 DACs per transmit chain */
+    4,              /* M  number of DACss (0, 2, or 4) - 2 DACs per transmit chain */
     32,             /* K  #frames in a multiframe (default=32), F*K=multiple of 4. (F=2*M/numberOfLanes)*/
     1,              /* scramble  scrambling off if scramble= 0.*/
     1,              /* External SYSREF select. 0 = use internal SYSREF, 1 = external SYSREF*/
@@ -161,10 +161,10 @@ static mykonosSnifferGainControl_t snifferGainControl =
 
 static mykonosPeakDetAgcCfg_t rxPeakAgc =
 {
-    0x1F,	/* apdHighThresh: */
+    0x26,	/* apdHighThresh: */
     0x16,	/* apdLowThresh */
     0xB5,	/* hb2HighThresh */
-    0x80,	/* hb2LowThresh */
+    0x72,	/* hb2LowThresh */
     0x40,	/* hb2VeryLowThresh */
     0x06,	/* apdHighThreshExceededCnt */
     0x04,	/* apdLowThreshExceededCnt */
@@ -193,7 +193,7 @@ static mykonosPowerMeasAgcCfg_t rxPwrAgc =
     0x2,	/* pmdUpperLowGainStepAttack */
     0x2,	/* pmdLowerHighGainStepRecovery */
     0x4,	/* pmdLowerLowGainStepRecovery */
-    0x00,	/* pmdMeasDuration */
+    0x08,	/* pmdMeasDuration */
     0x02	/* pmdMeasConfig */
 };
 
@@ -208,10 +208,10 @@ static mykonosAgcCfg_t rxAgcConfig =
     1,		/* agcObsRxSelect */
     1,		/* agcPeakThresholdMode */
     1,		/* agcLowThsPreventGainIncrease */
-    9596,	/* agcGainUpdateCounter */
-    4,	/* agcSlowLoopSettlingDelay */
-    2,	/* agcPeakWaitTime */
-    1,	/* agcResetOnRxEnable */
+    30720,	/* agcGainUpdateCounter */
+    3,	/* agcSlowLoopSettlingDelay */
+    4,	/* agcPeakWaitTime */
+    0,	/* agcResetOnRxEnable */
     0,	/* agcEnableSyncPulseForGainCounter */
     &rxPeakAgc,
     &rxPwrAgc
@@ -219,23 +219,23 @@ static mykonosAgcCfg_t rxAgcConfig =
 
 static mykonosPeakDetAgcCfg_t obsRxPeakAgc =
 {
-    0x1A,	/* apdHighThresh: */
-    0x10,	/* apdLowThresh */
+    0x2A,	/* apdHighThresh: */
+    0x16,	/* apdLowThresh */
     0xB5,	/* hb2HighThresh */
-    0x48,	/* hb2LowThresh */
-    0x28,	/* hb2VeryLowThresh */
-    0x06,	/* apdHighThreshExceededCnt */
-    0x04,	/* apdLowThreshExceededCnt */
-    0x06,	/* hb2HighThreshExceededCnt */
-    0x04,	/* hb2LowThreshExceededCnt */
-    0x04,	/* hb2VeryLowThreshExceededCnt */
+    0x72,	/* hb2LowThresh */
+    0x40,	/* hb2VeryLowThresh */
+    0x03,	/* apdHighThreshExceededCnt */
+    0x03,	/* apdLowThreshExceededCnt */
+    0x03,	/* hb2HighThreshExceededCnt */
+    0x03,	/* hb2LowThreshExceededCnt */
+    0x03,	/* hb2VeryLowThreshExceededCnt */
     0x4,	/* apdHighGainStepAttack */
     0x2,	/* apdLowGainStepRecovery */
     0x4,	/* hb2HighGainStepAttack */
     0x2,	/* hb2LowGainStepRecovery */
     0x4,	/* hb2VeryLowGainStepRecovery */
-    0x1,	/* apdFastAttack */
-    0x1,	/* hb2FastAttack */
+    0x0,	/* apdFastAttack */
+    0x0,	/* hb2FastAttack */
     0x1,	/* hb2OverloadDetectEnable */
     0x1,	/* hb2OverloadDurationCnt */
     0x1		/* hb2OverloadThreshCnt */
@@ -246,11 +246,11 @@ static mykonosPowerMeasAgcCfg_t obsRxPwrAgc =
     0x01,	/* pmdUpperHighThresh */
     0x03,	/* pmdUpperLowThresh */
     0x0C,	/* pmdLowerHighThresh */
-    0x00,	/* pmdLowerLowThresh */
-    0x4,	/* pmdUpperHighGainStepAttack */
-    0x2,	/* pmdUpperLowGainStepAttack */
-    0x2,	/* pmdLowerHighGainStepRecovery */
-    0x4,	/* pmdLowerLowGainStepRecovery */
+    0x04,	/* pmdLowerLowThresh */
+    0x0,	/* pmdUpperHighGainStepAttack */
+    0x0,	/* pmdUpperLowGainStepAttack */
+    0x0,	/* pmdLowerHighGainStepRecovery */
+    0x0,	/* pmdLowerLowGainStepRecovery */
     0x08,	/* pmdMeasDuration */
     0x02	/* pmdMeasConfig */
 };
@@ -275,48 +275,48 @@ static mykonosAgcCfg_t obsRxAgcConfig =
     &obsRxPwrAgc
 };
 
-static uint16_t rxAdcCustom[]={479,285,190,98,1280,112,1505,53,1574,25,1026,40,48,48,29,186};
+static uint16_t rxAdcCustom[]={586,362,201,98,1280,190,1520,93,1326,36,814,37,48,40,23,190};
 
 static mykonosRxProfile_t rxProfile =
-{/* RX 20MHz, Iqrate 38.4MSPS, DEC5 */
+{/* RX 50MHz, Iqrate 122.88MSPS, DEC5 */
     1,              /* The divider used to generate the ADC clock*/
     &rxFir,         /* Pointer to Rx FIR filter structure*/
-    4,              /* Rx FIR decimation (1,2,4)*/
+    2,              /* Rx FIR decimation (1,2,4)*/
     5,              /* Decimation of Dec5 or Dec4 filter (5,4)*/
     1,              /* If set, and DEC5 filter used, will use a higher rejection DEC5 FIR filter (1=Enabled, 0=Disabled)*/
-    2,              /* RX Half band 1 decimation (1 or 2)*/
-    38400,          /* Rx IQ data rate in kHz*/
-    20000000,       /* The Rx RF passband bandwidth for the profile*/
-    20000,          /* Rx BBF 3dB corner in kHz*/
+    1,              /* RX Half band 1 decimation (1 or 2)*/
+    122880,         /* Rx IQ data rate in kHz*/
+    60000000,       /* The Rx RF passband bandwidth for the profile*/
+    60000,          /* Rx BBF 3dB corner in kHz*/
     &rxAdcCustom[0] /* pointer to custom ADC profile*/
 };
-static uint16_t orxAdcCustom[]={392,299,180,98,1280,514,1728,570,1638,498,1104,27,48,44,32,200};
+static uint16_t orxAdcCustom[]={450,349,201,98,1280,730,1626,818,1476,732,834,20,41,36,24,200};
 
 static mykonosRxProfile_t orxProfile =
-{/* ORX 200MHz, Iqrate 307.2MSPS, DEC5 */
+{/* ORX 200MHz, Iqrate 245.76MSPS, DEC5 */
     1,              /* The divider used to generate the ADC clock*/
     &obsrxFir,      /* Pointer to Rx FIR filter structure or NULL*/
     1,              /* Rx FIR decimation (1,2,4)*/
     5,              /* Decimation of Dec5 or Dec4 filter (5,4)*/
     0,              /* If set, and DEC5 filter used, will use a higher rejection DEC5 FIR filter (1=Enabled, 0=Disabled)*/
     1,              /* RX Half band 1 decimation (1 or 2)*/
-    307200,         /* Rx IQ data rate in kHz*/
+    245760,         /* Rx IQ data rate in kHz*/
     200000000,      /* The Rx RF passband bandwidth for the profile*/
     100000,         /* Rx BBF 3dB corner in kHz*/
     &orxAdcCustom[0] /* pointer to custom ADC profile*/
 };
 
-static uint16_t snifferAdcCustom[]={479,285,190,98,1280,112,1505,53,1574,25,1026,40,48,48,29,186};
+static uint16_t snifferAdcCustom[]={599,357,201,98,1280,112,1505,53,1331,21,820,40,48,40,23,191};
 
 static mykonosRxProfile_t snifferProfile =
-{ /* SNIFFER 20MHz, Iqrate 38.4MSPS, DEC5 */
+{ /* SNIFFER 20MHz, Iqrate 30.72MSPS, DEC5 */
     1,              /* The divider used to generate the ADC clock*/
     &snifferRxFir,  /* Pointer to Rx FIR filter structure or NULL*/
     4,              /* Rx FIR decimation (1,2,4)*/
     5,              /* Decimation of Dec5 or Dec4 filter (5,4)*/
     0,              /* If set, and DEC5 filter used, will use a higher rejection DEC5 FIR filter (1=Enabled, 0=Disabled)*/
     2,              /* RX Half band 1 decimation (1 or 2)*/
-    38400,          /* Rx IQ data rate in kHz*/
+    30720,          /* Rx IQ data rate in kHz*/
     20000000,       /* The Rx RF passband bandwidth for the profile*/
     20000,          /* Rx BBF 3dB corner in kHz*/
     &snifferAdcCustom[0] /* pointer to custom ADC profile*/
@@ -325,25 +325,25 @@ static mykonosRxProfile_t snifferProfile =
 
 
 static mykonosTxProfile_t txProfile =
-{ /* TX 75/210MHz, Iqrate 307.2MSPS, DEC5 */
+{ /* TX 75/200MHz, Iqrate 245.76MSPS, DEC5 */
     DACDIV_2p5,     /* The divider used to generate the DAC clock*/
     &txFir,         /* Pointer to Tx FIR filter structure*/
     1,              /* The Tx digital FIR filter interpolation (1,2,4)*/
     2,              /* Tx Halfband1 filter interpolation (1,2)*/
     1,              /* Tx Halfband2 filter interpolation (1,2)*/
     1,              /* TxInputHbInterpolation (1,2)*/
-    307200,         /* Tx IQ data rate in kHz*/
+    245760,         /* Tx IQ data rate in kHz*/
     75000000,       /* Primary Signal BW*/
-    210000000,      /* The Tx RF passband bandwidth for the profile*/
+    200000000,      /* The Tx RF passband bandwidth for the profile*/
     187000,         /* The DAC filter 3dB corner in kHz*/
-    105000,         /* Tx BBF 3dB corner in kHz*/
+    100000,         /* Tx BBF 3dB corner in kHz*/
     0               /* Enable DPD, only valid for AD9373*/
 };
 
 static mykonosDigClocks_t mykonosClocks =
 {
-    153600,         /* CLKPLL and device reference clock frequency in kHz*/
-    12288000,       /* CLKPLL VCO frequency in kHz*/
+    122880,         /* CLKPLL and device reference clock frequency in kHz*/
+    9830400,        /* CLKPLL VCO frequency in kHz*/
     VCODIV_2,       /* CLKPLL VCO divider*/
     4               /* CLKPLL high speed clock divider*/
 };
@@ -354,9 +354,9 @@ static mykonosRxSettings_t  rxSettings =
     &rxFramer,      /* Rx JESD204b framer configuration structure*/
     &rxGainControl, /* Rx Gain control settings structure*/
     &rxAgcConfig,   /* Rx AGC control settings structure*/
-    1,              /* The desired Rx Channels to enable during initialization*/
+    3,              /* The desired Rx Channels to enable during initialization*/
     0,              /* Internal LO = 0, external LO*2 = 1*/
-    1234000000U,    /* Rx PLL LO Frequency (internal or external LO)*/
+    1500000000U,    /* Rx PLL LO Frequency (internal or external LO)*/
     0               /* Flag to choose if complex baseband or real IF data are selected for Rx and ObsRx paths. Where, if > 0 = real IF data, '0' = zero IF (IQ) data*/
 };
 
@@ -409,9 +409,9 @@ static mykonosTxSettings_t txSettings =
 {
     &txProfile,     /* Tx datapath profile, 3dB corner frequencies, and digital filter enables*/
     &deframer,      /* Mykonos JESD204b deframer config for the Tx data path*/
-    TX1,            /* The desired Tx channels to enable during initialization*/
+    TX1_TX2,        /* The desired Tx channels to enable during initialization*/
     0,              /* Internal LO=0, external LO*2 if =1*/
-    1500000000U,    /* Tx PLL LO frequency (internal or external LO)*/
+    1990000000U,    /* Tx PLL LO frequency (internal or external LO)*/
     TXATTEN_0P05_DB,/* Initial and current Tx1 Attenuation*/
     10000,          /* Initial and current Tx1 Attenuation mdB*/
     10000,          /* Initial and current Tx2 Attenuation mdB*/
@@ -420,7 +420,7 @@ static mykonosTxSettings_t txSettings =
     NULL            /* VSWR Config Structure. Only valid for AD9373 device, set pointer to NULL otherwise*/
 };
 
-static uint16_t lpbkAdcCustom[]={468,289,191,98,1280,190,1520,93,1578,43,1019,37,48,48,29,185};
+static uint16_t lpbkAdcCustom[]={569,369,201,98,1280,291,1541,149,1320,58,807,34,48,40,23,189};
 
 static mykonosObsRxSettings_t obsRxSettings =
 {
@@ -432,7 +432,7 @@ static mykonosObsRxSettings_t obsRxSettings =
     &obsRxFramer,   /* ObsRx JESD204b framer configuration structure */
     (MYK_ORX1_ORX2 | MYK_SNRXA_B_C),/* obsRxChannel */
     OBSLO_TX_PLL,   /* (obsRxLoSource) The Obs Rx mixer can use the Tx Synth(TX_PLL) or Sniffer Synth (SNIFFER_PLL) */
-    1234000000U,    /* SnRx PLL LO frequency in Hz */
+    2010000000U,    /* SnRx PLL LO frequency in Hz */
     0,              /* Flag to choose if complex baseband or real IF data are selected for Rx and ObsRx paths. Where if > 0 = real IF data, '0' = complex data*/
     &lpbkAdcCustom[0],/* Custom Loopback ADC profile to set the bandwidth of the ADC response*/
     OBS_RXOFF       /* Default ObsRx channel to enter when radioOn called */
@@ -522,7 +522,7 @@ static mykonosTempSensorStatus_t tempStatus =
     0,              /* when the reading is complete and a valid temperature value stored in tempCode.*/
 };
 
-mykonosDevice_t mykDevice_384 =
+mykonosDevice_t mykDevice_705wd =
 {
     &mykSpiSettings,    /* SPI settings data structure pointer */
     &rxSettings,        /* Rx settings data structure pointer */

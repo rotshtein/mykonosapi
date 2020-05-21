@@ -15,9 +15,9 @@
 *
 */
 
-#ifndef PROFILE_NARROW_705_H_
-#define PROFILE_NARROW_705_H_
+#ifndef MYK_INIT_H_705nd_926
+#define MYK_INIT_H_705nd_926
 
-extern mykonosDevice_t mykDevice_narrow_0705;
+extern mykonosDevice_t mykDevice_705nd;
 
 #endif

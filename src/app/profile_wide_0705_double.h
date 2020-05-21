@@ -15,9 +15,9 @@
 *
 */
 
-#ifndef PROFILE_WIDE_705_H_
-#define PROFILE_WIDE_705_H_
+#ifndef MYK_INIT_H_705wd
+#define MYK_INIT_H_705wd
 
-extern mykonosDevice_t mykDevice_wide_705;
+extern mykonosDevice_t mykDevice_705wd;
 
 #endif

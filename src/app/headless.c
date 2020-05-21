@@ -69,10 +69,10 @@
 #include <locale.h>
 #include <string.h>
 #include <unistd.h> 
-#include "profile_384.h"
-#include "profile_1536.h"
-#include "profile_wide_0705.h"
-#include "profile_narrow_0705.h"
+
+#include "profile_wide_double.h"
+#include "profile_narrow_double.h"
+
 
 //for knhit
 #include <stdio.h>
@@ -86,12 +86,8 @@ int kbhit(void);
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
 extern ad9528Device_t clockAD9528_;
-extern ad9528Device_t clockAD9528_384;
-extern ad9528Device_t clockAD9528_1536;
-extern ad9528Device_t clockAD9528_wide_0705;
-extern ad9528Device_t clockAD9528_narrow_0705;
-
-
+extern ad9528Device_t clockAD9528_705wd;
+extern ad9528Device_t clockAD9528_705nd;
 extern mykonosDevice_t mykDevice;
 #define VERSION "1.2"
 
@@ -105,10 +101,11 @@ void print_help()
 	printf("           * addresses and vlue can be in decimal or hex with leading 0x\n");
 	printf("\n");
 	printf("\n");
-	printf("   -p <profile 0=384, 1=1536, 2 = narrow 705,  3=wide 705>        (0)\n");
+	printf("   -p <profile 0= narrow, 1=wide        (0)\n");
 	printf("   -t <tx frequency in Hz>                                        (1e9)\n");
 	printf("   -f <rc frequency in Hz>                                        (1e9)\n");
-	printf("   -a <attenuation [dbM]>                                           (0)\n");
+	printf("   -a <attenuation [milli db]>                                    (0)\n");
+	printf("   -c <change attenuation [milli db]>                             (0)\n");
 }
 
 
@@ -121,7 +118,7 @@ int main(int argc, char * argv[])
 	int value = 0;
 	int profile = 0;
 	uint64_t tx_frequency_Hz = 1e9;
-	int attenuation = 0;
+	int attenuation = 0, change_attenuation = 50000;
     uint64_t rx_frequency_Hz = 1e9;
 
 	if (argc > 1)
@@ -132,7 +129,7 @@ int main(int argc, char * argv[])
 		// put ':' in the starting of the 
 		// string so that program can  
 		//distinguish between '?' and ':'  
-		while ((opt = getopt(argc, argv, ":p:t:f:r:w:a:hH")) != -1)
+		while ((opt = getopt(argc, argv, ":c:p:t:f:r:w:a:hH")) != -1)
 		{
 			extern char *optarg;
 			extern int optopt;
@@ -165,6 +162,11 @@ int main(int argc, char * argv[])
 					printf("Value = 0x%X\n", value);
 					break;
 				}
+			case 'c':
+				change_attenuation = (uint32_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
+
+				break;
+
 			case 'p':
 				profile = atoi(optarg);
 				/*if ((profile < 0) || (profile > 1))
@@ -227,30 +229,17 @@ int main(int argc, char * argv[])
 	printf("***************************\n");
 	switch (profile)
 	{
+	
 	case 0:
-		memcpy(&mykDevice, &mykDevice_384, sizeof(mykDevice));
-		clockAD9528_device = &clockAD9528_384;
-		printf("      Profile: 38.4\n");
+		memcpy(&mykDevice, &mykDevice_705nd, sizeof(mykDevice));
+		clockAD9528_device = &clockAD9528_705nd; // clockAD9528_wide_0705;
+		printf("       Profile: Wide Double 245.76 Tx 61.44 Rx\n");
 		break;
-
-	case 1:
-		memcpy(&mykDevice, &mykDevice_1536, sizeof(mykDevice));
-		clockAD9528_device = &clockAD9528_1536;
-		printf("      Profile: 153.6\n");
-		break;
-
 	case 2:
-		memcpy(&mykDevice, &mykDevice_narrow_0705, sizeof(mykDevice));
-		clockAD9528_device = &clockAD9528_narrow_0705;
-		printf("      Profile: Narrow 705\n");
+		memcpy(&mykDevice, &mykDevice_705wd, sizeof(mykDevice));
+		clockAD9528_device = &clockAD9528_705wd; // clockAD9528_wide_0705 double;
+		printf("      Profile: Wide Double 245.76 Tx 122.88 Rx  \n");
 		break;
-
-	case 3:
-		memcpy(&mykDevice, &mykDevice_wide_705, sizeof(mykDevice));
-		clockAD9528_device = &clockAD9528_wide_0705;
-		printf("      Profile: Wide 705\n");
-		break;
-
 	default:
 		printf("      Profile: default (myc.c)\n");
 		break;
@@ -258,6 +247,37 @@ int main(int argc, char * argv[])
 	printf("***************************\n");
 	printf("receive profile number: \t%d\n", profile);
 #endif
+
+	if (change_attenuation < 50000)
+	{
+		int ret = platform_init();
+		if (ret != SUCCESS) {
+			printf("error: platform_init() failed\n");
+		}
+		else
+		{
+			uint64_t rfPllLoFrequency_Hz;
+			MYKONOS_getRfPllFrequency(&mykDevice, RX_PLL, &rfPllLoFrequency_Hz);
+			printf("Current Rx frequency %lld [Hz]", rfPllLoFrequency_Hz);
+
+			unsigned short current_attenuation = 0xFFFF;
+			MYKONOS_getTx1Attenuation(&mykDevice, &current_attenuation);
+			printf("Current attenuation is %d [mili DB]\n", current_attenuation);
+
+			current_attenuation = (unsigned short)change_attenuation;
+			printf("Setting attenuation to %d [mili DB]\n", current_attenuation);
+			MYKONOS_setTx1Attenuation(&mykDevice, current_attenuation);
+			
+			current_attenuation = 0xFFFF;
+			MYKONOS_getTx1Attenuation(&mykDevice, &current_attenuation);
+			printf("New attenuation is %d [mili DB]\n", current_attenuation);
+
+
+
+		}
+		return(0);
+	}
+
 	// Set the Tx Frequency
 	mykDevice.tx->txPllUseExternalLo = 0; // Use internal LO
 	mykDevice.tx->txPllLoFrequency_Hz = tx_frequency_Hz;
@@ -268,9 +288,7 @@ int main(int argc, char * argv[])
 	mykDevice.rx->rxPllLoFrequency_Hz = rx_frequency_Hz;
 	printf("receive: \t\t\t%llu [Hz]\n", mykDevice.rx->rxPllLoFrequency_Hz);
 
-	// Set the Tx Attenuation
-	mykDevice.tx->tx1Atten_mdB = attenuation;
-	printf("transmit attenuation: \t\t%d [dbM]\n", attenuation);
+	
 
 	ADI_ERR error;
 	
@@ -597,12 +615,19 @@ int main(int argc, char * argv[])
 	}
 #endif
 
+	
+
 	/* Initialize JESDs */
 	status = axi_jesd204_rx_init(&rx_jesd, &rx_jesd_init);
+	
+	
+
 	if (status != SUCCESS) {
 		printf("error: %s: axi_jesd204_rx_init() failed\n", rx_jesd_init.name);
 		goto error_4;
 	}
+
+
 	status = axi_jesd204_tx_init(&tx_jesd, &tx_jesd_init);
 	if (status != SUCCESS) {
 		printf("error: %s: axi_jesd204_rx_init() failed\n", rx_jesd_init.name);
@@ -1059,7 +1084,6 @@ int main(int argc, char * argv[])
 
 	axi_jesd204_rx_watchdog(rx_jesd);
 	axi_jesd204_rx_watchdog(rx_os_jesd);
-
 	mdelay(1000);
 
 	/* Print JESD status */
@@ -1099,13 +1123,23 @@ int main(int argc, char * argv[])
 	/*************************************************************************/
 	/*****           Sorin - check attenuation                           *****/
 	/*************************************************************************/
+	// Set the Tx Attenuation
+	//mykDevice.tx->tx1Atten_mdB = attenuation;
+	printf("Transmit attenuation: \t\t%d [dbM]\n", attenuation);
+
+
+
+	uint16_t tx1Attenuation_mdB = attenuation;
+	MYKONOS_setTx1Attenuation(&mykDevice, attenuation);
+	MYKONOS_setTx2Attenuation(&mykDevice, 49500);
+
 
 	printf("\nSorin [press enter to end test]\n");
 	printf("\tCheck attenuation\n");
-
-	uint16_t tx1Attenuation_mdB;
+	tx1Attenuation_mdB = -100;
+	
 	MYKONOS_getTx1Attenuation(&mykDevice, &tx1Attenuation_mdB);
-	printf("\t\tAttenuation = %hu\n", tx1Attenuation_mdB);
+	printf("\t\tGot Attenuation = %hu\n", tx1Attenuation_mdB);
 	/*************************************************************************/
 	/*****           Sorin - protect DAC                                 *****/
 	/*************************************************************************/
@@ -1131,7 +1165,7 @@ int main(int argc, char * argv[])
 	MYKONOS_jesd204bIlasCheck(&mykDevice, &smismatch);
 	printf("\t\tjesd204bIlasCheck = %u\n", smismatch);
 
-	
+
 	printf("\tContinues power meter\n");
 	
 	MYKONOS_enablePaProtection(&mykDevice, 1);

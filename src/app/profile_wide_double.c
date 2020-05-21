@@ -11,7 +11,7 @@
  * Cus 122.88Mhz
  * 
  * Profiles:
- * Cus RX 13MHz, Iqrate 30.72MSPS, DEC5
+ * Cus RX 60MHz, Iqrate 122.88MSPS, DEC5
  * Cus TX 75/200MHz, Iqrate 245.76MSPS, DEC5
  * Cus ORX 200MHz, Iqrate 245.76MSPS, DEC5
  * Cus SNIFFER 20MHz, Iqrate 30.72MSPS, DEC5
@@ -27,9 +27,9 @@
 #include <stddef.h>
 #include "t_mykonos.h"
 #include "t_mykonos_gpio.h"
-#include "profile_narrow_0705.h"
+#include "profile_wide_double.h"
 
-static int16_t txFirCoefs[] = {6,-270,203,-168,-84,983,-3222,21143,-3222,983,-84,-168,203,-270,6,0};
+static int16_t txFirCoefs[] = {141,-277,203,-241,-42,910,-3174,21075,-3174,910,-42,-241,203,-277,141,0};
 
 static mykonosFir_t txFir =
 {
@@ -38,12 +38,12 @@ static mykonosFir_t txFir =
     &txFirCoefs[0]  /* A pointer to an array of filter coefficients*/
 };
 
-static int16_t rxFirCoefs[] = {0,1,2,5,5,2,-7,-21,-33,-34,-12,34,94,139,134,49,-110,-298,-427,-400,-157,276,764,1091,1028,446,-591,-1786,-2654,-2661,-1419,1144,4693,8533,11787,13653,13653,11787,8533,4693,1144,-1419,-2661,-2654,-1786,-591,446,1028,1091,764,276,-157,-400,-427,-298,-110,49,134,139,94,34,-12,-34,-33,-21,-7,2,5,5,2,1,0};
+static int16_t rxFirCoefs[] = {4,8,-6,-32,-26,51,124,34,-219,-314,66,643,572,-495,-1483,-733,1663,2951,391,-4623,-6157,893,14495,25555,25555,14495,893,-6157,-4623,391,2951,1663,-733,-1483,-495,572,643,66,-314,-219,34,124,51,-26,-32,-6,8,4};
 
 static mykonosFir_t rxFir =
 {
     -6,             /* Filter gain in dB*/
-    72,             /* Number of coefficients in the FIR filter*/
+    48,             /* Number of coefficients in the FIR filter*/
     &rxFirCoefs[0]  /* A pointer to an array of filter coefficients*/
 };
 
@@ -68,12 +68,12 @@ static mykonosJesd204bFramerConfig_t rxFramer =
     0,              /* JESD204B Configuration Bank ID -extension to Device ID (Valid 0..15)*/
     0,              /* JESD204B Configuration Device ID - link identification number. (Valid 0..255)*/
     0,              /* JESD204B Configuration starting Lane ID.  If more than one lane used, each lane will increment from the Lane0 ID. (Valid 0..31)*/
-    2,              /* number of ADCs (0, 2, or 4) - 2 ADCs per receive chain*/
+    4,              /* number of ADCs (0, 2, or 4) - 2 ADCs per receive chain*/
     32,             /* number of frames in a multiframe (default=32), F*K must be a multiple of 4. (F=2*M/numberOfLanes)*/
     1,              /* scrambling off if framerScramble= 0, if framerScramble>0 scramble is enabled.*/
     1,              /* 0=use internal SYSREF, 1= use external SYSREF*/
-    0x01,           /* serializerLanesEnabled - bit per lane, [0] = Lane0 enabled, [1] = Lane1 enabled*/
-    0x00,           /* serializerLaneCrossbar*/
+    0x03,           /* serializerLanesEnabled - bit per lane, [0] = Lane0 enabled, [1] = Lane1 enabled*/
+    0xE4,           /* serializerLaneCrossbar*/
     22,             /* serializerAmplitude - default 22 (valid (0-31)*/
     4,              /* preEmphasis - < default 4 (valid 0 - 7)*/
     0,              /* invertLanePolarity - default 0 ([0] will invert lane [0], bit1 will invert lane1)*/
@@ -93,10 +93,10 @@ static mykonosJesd204bFramerConfig_t obsRxFramer =
     0,              /* JESD204B Configuration starting Lane ID.  If more than one lane used, each lane will increment from the Lane0 ID. (Valid 0..31)*/
     2,              /* number of ADCs (0, 2, or 4) - 2 ADCs per receive chain*/
     32,             /* number of frames in a multiframe (default=32), F*K must be a multiple of 4. (F=2*M/numberOfLanes)*/
-    0,              /* scrambling off if framerScramble= 0, if framerScramble>0 scramble is enabled.*/
+    1,              /* scrambling off if framerScramble= 0, if framerScramble>0 scramble is enabled.*/
     1,              /* 0=use internal SYSREF, 1= use external SYSREF*/
     0x0C,           /* serializerLanesEnabled - bit per lane, [0] = Lane0 enabled, [1] = Lane1 enabled*/
-    0x40,           /* Lane crossbar to map framer lane outputs to physical lanes*/
+    0xE4,           /* Lane crossbar to map framer lane outputs to physical lanes*/
     22,             /* serializerAmplitude - default 22 (valid (0-31)*/
     4,              /* preEmphasis - < default 4 (valid 0 - 7)*/
     0,              /* invertLanePolarity - default 0 ([0] will invert lane [0], bit1 will invert lane1)*/
@@ -114,7 +114,7 @@ static mykonosJesd204bDeframerConfig_t deframer =
     0,              /* bankId extension to Device ID (Valid 0..15)*/
     0,              /* deviceId  link identification number. (Valid 0..255)*/
     0,              /* lane0Id Lane0 ID. (Valid 0..31)*/
-    2,              /* M  number of DACss (0, 2, or 4) - 2 DACs per transmit chain */
+    4,              /* M  number of DACss (0, 2, or 4) - 2 DACs per transmit chain */
     32,             /* K  #frames in a multiframe (default=32), F*K=multiple of 4. (F=2*M/numberOfLanes)*/
     1,              /* scramble  scrambling off if scramble= 0.*/
     1,              /* External SYSREF select. 0 = use internal SYSREF, 1 = external SYSREF*/
@@ -275,19 +275,19 @@ static mykonosAgcCfg_t obsRxAgcConfig =
     &obsRxPwrAgc
 };
 
-static uint16_t rxAdcCustom[]={599,357,201,98,1280,112,1505,53,1331,21,820,40,48,40,23,191};
+static uint16_t rxAdcCustom[]={586,362,201,98,1280,190,1520,93,1326,36,814,37,48,40,23,190};
 
 static mykonosRxProfile_t rxProfile =
-{/* RX 13MHz, Iqrate 30.72MSPS, DEC5 */
+{/* RX 50MHz, Iqrate 122.88MSPS, DEC5 */
     1,              /* The divider used to generate the ADC clock*/
     &rxFir,         /* Pointer to Rx FIR filter structure*/
-    4,              /* Rx FIR decimation (1,2,4)*/
+    2,              /* Rx FIR decimation (1,2,4)*/
     5,              /* Decimation of Dec5 or Dec4 filter (5,4)*/
     1,              /* If set, and DEC5 filter used, will use a higher rejection DEC5 FIR filter (1=Enabled, 0=Disabled)*/
-    2,              /* RX Half band 1 decimation (1 or 2)*/
-    30720,          /* Rx IQ data rate in kHz*/
-    13000000,       /* The Rx RF passband bandwidth for the profile*/
-    20000,          /* Rx BBF 3dB corner in kHz*/
+    1,              /* RX Half band 1 decimation (1 or 2)*/
+    122880,         /* Rx IQ data rate in kHz*/
+    60000000,       /* The Rx RF passband bandwidth for the profile*/
+    60000,          /* Rx BBF 3dB corner in kHz*/
     &rxAdcCustom[0] /* pointer to custom ADC profile*/
 };
 static uint16_t orxAdcCustom[]={450,349,201,98,1280,730,1626,818,1476,732,834,20,41,36,24,200};
@@ -354,9 +354,9 @@ static mykonosRxSettings_t  rxSettings =
     &rxFramer,      /* Rx JESD204b framer configuration structure*/
     &rxGainControl, /* Rx Gain control settings structure*/
     &rxAgcConfig,   /* Rx AGC control settings structure*/
-    1,              /* The desired Rx Channels to enable during initialization*/
+    3,              /* The desired Rx Channels to enable during initialization*/
     0,              /* Internal LO = 0, external LO*2 = 1*/
-    2000000000U,    /* Rx PLL LO Frequency (internal or external LO)*/
+    1500000000U,    /* Rx PLL LO Frequency (internal or external LO)*/
     0               /* Flag to choose if complex baseband or real IF data are selected for Rx and ObsRx paths. Where, if > 0 = real IF data, '0' = zero IF (IQ) data*/
 };
 
@@ -409,7 +409,7 @@ static mykonosTxSettings_t txSettings =
 {
     &txProfile,     /* Tx datapath profile, 3dB corner frequencies, and digital filter enables*/
     &deframer,      /* Mykonos JESD204b deframer config for the Tx data path*/
-    TX1,            /* The desired Tx channels to enable during initialization*/
+    TX1_TX2,        /* The desired Tx channels to enable during initialization*/
     0,              /* Internal LO=0, external LO*2 if =1*/
     1990000000U,    /* Tx PLL LO frequency (internal or external LO)*/
     TXATTEN_0P05_DB,/* Initial and current Tx1 Attenuation*/
@@ -522,7 +522,7 @@ static mykonosTempSensorStatus_t tempStatus =
     0,              /* when the reading is complete and a valid temperature value stored in tempCode.*/
 };
 
-mykonosDevice_t mykDevice_narrow_0705 =
+mykonosDevice_t mykDevice_705wd =
 {
     &mykSpiSettings,    /* SPI settings data structure pointer */
     &rxSettings,        /* Rx settings data structure pointer */

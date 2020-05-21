@@ -39,10 +39,10 @@
     <ClCompile Include="src\app\headless.c" />
     <ClCompile Include="src\app\myk.c" />
     <ClCompile Include="src\app\myk_ad9528init.c" />
-    <ClCompile Include="src\app\profile 384_ad9528init.c" />
-    <ClCompile Include="src\app\profile_1536.c" />
-    <ClCompile Include="src\app\profile_1536_ad9528init.c" />
-    <ClCompile Include="src\app\profile_384.c" />
+    <ClCompile Include="src\app\profile_wide_double.c" />
+    <ClCompile Include="src\app\profile_wide_double_ad9528init.c" />
+    <ClCompile Include="src\app\profile_narrow_double.c" />
+    <ClCompile Include="src\app\profile_narrow_double_ad9528init.c" />
     <ClCompile Include="src\app\sin.c" />
     <ClCompile Include="src\devices\ad9528\ad9528.c" />
     <ClCompile Include="src\devices\adi_hal\altera_a10_atx_pll.c" />
@@ -67,8 +67,8 @@
   <ItemGroup>
     <ClInclude Include="src\app\dvbs2x.h" />
     <ClInclude Include="src\app\myk.h" />
-    <ClInclude Include="src\app\profile_1536.h" />
-    <ClInclude Include="src\app\profile_384.h" />
+    <ClInclude Include="src\app\profile_wide_double.h" />
+    <ClInclude Include="src\app\profile_narrow_double.h" />
     <ClInclude Include="src\app\sin.h" />
     <ClInclude Include="src\devices\ad9528\ad9528.h" />
     <ClInclude Include="src\devices\ad9528\t_ad9528.h" />

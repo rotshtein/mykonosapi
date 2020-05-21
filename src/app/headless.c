@@ -258,7 +258,7 @@ int main(int argc, char * argv[])
 		{
 			uint64_t rfPllLoFrequency_Hz;
 			MYKONOS_getRfPllFrequency(&mykDevice, RX_PLL, &rfPllLoFrequency_Hz);
-			printf("Current Rx frequency %lld [Hz]", rfPllLoFrequency_Hz);
+			printf("Current Rx frequency %lld [Hz]\n", rfPllLoFrequency_Hz);
 
 			unsigned short current_attenuation = 0xFFFF;
 			MYKONOS_getTx1Attenuation(&mykDevice, &current_attenuation);

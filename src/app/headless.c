@@ -72,6 +72,7 @@
 
 #include "profile_wide_double.h"
 #include "profile_narrow_double.h"
+#include "change_frequency.h"
 
 
 //for knhit
@@ -101,11 +102,14 @@ void print_help()
 	printf("           * addresses and vlue can be in decimal or hex with leading 0x\n");
 	printf("\n");
 	printf("\n");
-	printf("   -p <profile 0= narrow, 1=wide        (0)\n");
+	printf("   -o transmir content: <0 - FF burst, 1 - LO, 2 = Sin>             (0)\n");
+	printf("   -p <profile 0= narrow, 1=wide                                    (0)\n");
 	printf("   -t <tx frequency in Hz>                                        (1e9)\n");
-	printf("   -f <rc frequency in Hz>                                        (1e9)\n");
-	printf("   -a <attenuation [milli db]>                                    (0)\n");
-	printf("   -c <change attenuation [milli db]>                             (0)\n");
+	printf("   -f <rx frequency in Hz>                                        (1e9)\n");
+	printf("   -a <attenuation [milli db]>                                      (0)\n");
+	printf("   -c <change attenuation [milli db]>                               (0)\n");
+	printf("   -T <set new tx frequency in Hz>                                  (0)\n");
+	printf("   -F <set new rx frequency in Hz>                                  (0)\n");
 }
 
 
@@ -118,8 +122,13 @@ int main(int argc, char * argv[])
 	int value = 0;
 	int profile = 0;
 	uint64_t tx_frequency_Hz = 1e9;
+	uint64_t rx_frequency_Hz = 1e9;
+	uint64_t new_tx_frequency_Hz = 0;
+	uint64_t new_rx_frequency_Hz = 0;
+	int output_waveform = -1;
+	char *output_type[3] = { "FF bursts", "LO", "Sin" };
 	int attenuation = 0, change_attenuation = 50000;
-    uint64_t rx_frequency_Hz = 1e9;
+    
 
 	if (argc > 1)
 	{
@@ -129,7 +138,7 @@ int main(int argc, char * argv[])
 		// put ':' in the starting of the 
 		// string so that program can  
 		//distinguish between '?' and ':'  
-		while ((opt = getopt(argc, argv, ":c:p:t:f:r:w:a:hH")) != -1)
+		while ((opt = getopt(argc, argv, ":o:F:T:c:p:t:f:r:w:a:hH")) != -1)
 		{
 			extern char *optarg;
 			extern int optopt;
@@ -164,7 +173,10 @@ int main(int argc, char * argv[])
 				}
 			case 'c':
 				change_attenuation = (uint32_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
+				break;
 
+			case 'o':
+				output_waveform = (uint32_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
 				break;
 
 			case 'p':
@@ -180,9 +192,19 @@ int main(int argc, char * argv[])
 				tx_frequency_Hz = (uint64_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
 				break;
 
+			case 'T':
+				setlocale(LC_NUMERIC, "");
+				new_tx_frequency_Hz = (uint64_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
+				break;
+
 			case 'f':
 				setlocale(LC_NUMERIC, "");
 				rx_frequency_Hz = (uint64_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
+				break;
+
+			case 'F':
+				setlocale(LC_NUMERIC, "");
+				new_rx_frequency_Hz = (uint64_t)(optarg[1] == 'x' ? (int)strtol(optarg, NULL, 16) : atoi(optarg));
 				break;
 
 			case 'a':
@@ -247,34 +269,60 @@ int main(int argc, char * argv[])
 	printf("***************************\n");
 	printf("receive profile number: \t%d\n", profile);
 #endif
+	int ret_platfor = platform_init();
+	if (ret_platfor != SUCCESS)
+	{
+		printf("error: platform_init() failed\n");
+	}
+	
+	//set transmit content
+	if (output_waveform != (-1))
+	{
+		printf("Setting output content to: %s\n\n", output_type[output_waveform]);
+		IOWR_32DIRECT(0, 0x2F010, output_waveform);
+	}
+
+	if ((new_rx_frequency_Hz > 0) || (new_tx_frequency_Hz > 0))
+	{
+		printf("Changing frequncy:\n");
+		if (new_rx_frequency_Hz > 0)
+			printf("\tRx\t%llu => %llu\n", rx_frequency_Hz, new_rx_frequency_Hz);
+		if (new_tx_frequency_Hz > 0)
+			printf("\tTx\t%llu => %llu\n", tx_frequency_Hz, new_tx_frequency_Hz);
+		int ret = change_frequency(&mykDevice, rx_frequency_Hz, new_rx_frequency_Hz, tx_frequency_Hz, new_tx_frequency_Hz);
+		uint64_t freq = 0;
+
+		MYKONOS_getRfPllFrequency(&mykDevice, RX_PLL, &freq);
+		printf("\t\tRx frequency is: %llu\n", freq);
+
+		MYKONOS_getRfPllFrequency(&mykDevice, TX_PLL, &freq);
+		printf("\t\tTx frequency is: %llu\n", freq);
+
+
+		if (ret != MYKONOS_ERR_OK)
+			printf("Error");
+		return(0);
+	}
+
+
 
 	if (change_attenuation < 50000)
 	{
-		int ret = platform_init();
-		if (ret != SUCCESS) {
-			printf("error: platform_init() failed\n");
-		}
-		else
-		{
-			uint64_t rfPllLoFrequency_Hz;
-			MYKONOS_getRfPllFrequency(&mykDevice, RX_PLL, &rfPllLoFrequency_Hz);
-			printf("Current Rx frequency %lld [Hz]\n", rfPllLoFrequency_Hz);
+		uint64_t rfPllLoFrequency_Hz;
+		MYKONOS_getRfPllFrequency(&mykDevice, RX_PLL, &rfPllLoFrequency_Hz);
+		printf("Current Rx frequency %lld [Hz]\n", rfPllLoFrequency_Hz);
 
-			unsigned short current_attenuation = 0xFFFF;
-			MYKONOS_getTx1Attenuation(&mykDevice, &current_attenuation);
-			printf("Current attenuation is %d [mili DB]\n", current_attenuation);
+		unsigned short current_attenuation = 0xFFFF;
+		MYKONOS_getTx1Attenuation(&mykDevice, &current_attenuation);
+		printf("Current attenuation is %d [mili DB]\n", current_attenuation);
 
-			current_attenuation = (unsigned short)change_attenuation;
-			printf("Setting attenuation to %d [mili DB]\n", current_attenuation);
-			MYKONOS_setTx1Attenuation(&mykDevice, current_attenuation);
+		current_attenuation = (unsigned short)change_attenuation;
+		printf("Setting attenuation to %d [mili DB]\n", current_attenuation);
+		MYKONOS_setTx1Attenuation(&mykDevice, current_attenuation);
 			
-			current_attenuation = 0xFFFF;
-			MYKONOS_getTx1Attenuation(&mykDevice, &current_attenuation);
-			printf("New attenuation is %d [mili DB]\n", current_attenuation);
-
-
-
-		}
+		current_attenuation = 0xFFFF;
+		MYKONOS_getTx1Attenuation(&mykDevice, &current_attenuation);
+		printf("New attenuation is %d [mili DB]\n", current_attenuation);
 		return(0);
 	}
 
@@ -495,13 +543,13 @@ int main(int argc, char * argv[])
 	errorString = NULL;
 #endif
 	printf("Please wait...\n");
-
+	/*
 	ret = platform_init();
 	if (ret != SUCCESS) {
 		printf("error: platform_init() failed\n");
 		goto error_0;
 	}
-
+	*/
 	/**************************************************************************/
 	/*****      System Clocks Initialization Initialization Sequence      *****/
 	/**************************************************************************/

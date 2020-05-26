@@ -44,6 +44,7 @@
     <ClCompile Include="src\app\profile_narrow_double.c" />
     <ClCompile Include="src\app\profile_narrow_double_ad9528init.c" />
     <ClCompile Include="src\app\sin.c" />
+    <ClCompile Include="src\app\change_frequency.c" />
     <ClCompile Include="src\devices\ad9528\ad9528.c" />
     <ClCompile Include="src\devices\adi_hal\altera_a10_atx_pll.c" />
     <ClCompile Include="src\devices\adi_hal\altera_a10_cdr_pll.c" />
@@ -70,6 +71,7 @@
     <ClInclude Include="src\app\profile_wide_double.h" />
     <ClInclude Include="src\app\profile_narrow_double.h" />
     <ClInclude Include="src\app\sin.h" />
+    <ClInclude Include="src\app\change_frequency.h" />
     <ClInclude Include="src\devices\ad9528\ad9528.h" />
     <ClInclude Include="src\devices\ad9528\t_ad9528.h" />
     <ClInclude Include="src\devices\adi_hal\altera_a10_atx_pll.h" />

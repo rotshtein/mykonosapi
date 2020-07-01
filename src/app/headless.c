@@ -135,6 +135,7 @@ int main(int argc, char * argv[])
 		
 		int opt;
 
+
 		// put ':' in the starting of the 
 		// string so that program can  
 		//distinguish between '?' and ':'  
@@ -266,6 +267,17 @@ int main(int argc, char * argv[])
 		printf("      Profile: default (myc.c)\n");
 		break;
 	}
+	/*
+	
+	uint8_t mykError1;
+	printf("Close radio");
+	if ((mykError1 = MYKONOS_radioOff(&mykDevice)) != MYKONOS_ERR_OK)
+	{
+		//errorString = getMykonosErrorMessage(mykError);
+		printf("%s", getMykonosErrorMessage(mykError1));
+	}
+	return 0;
+	*/
 	printf("***************************\n");
 	printf("receive profile number: \t%d\n", profile);
 #endif
@@ -289,7 +301,7 @@ int main(int argc, char * argv[])
 			printf("\tRx\t%llu => %llu\n", rx_frequency_Hz, new_rx_frequency_Hz);
 		if (new_tx_frequency_Hz > 0)
 			printf("\tTx\t%llu => %llu\n", tx_frequency_Hz, new_tx_frequency_Hz);
-		int ret = change_frequency(&mykDevice, rx_frequency_Hz, new_rx_frequency_Hz, tx_frequency_Hz, new_tx_frequency_Hz);
+		int ret = change_frequency(&mykDevice, new_rx_frequency_Hz, new_tx_frequency_Hz);
 		uint64_t freq = 0;
 
 		MYKONOS_getRfPllFrequency(&mykDevice, RX_PLL, &freq);
@@ -1217,6 +1229,11 @@ int main(int argc, char * argv[])
 	printf("\tContinues power meter\n");
 	
 	MYKONOS_enablePaProtection(&mykDevice, 1);
+		
+	if (mykError = MYKONOS_setRxGainControlMode(&mykDevice, AGC) != MYKONOS_ERR_OK)
+	{
+		printf("Error setting Rx AGC to auto: %s",getMykonosErrorMessage(mykError));
+	}
 
 	uint16_t maxPower = 0;
 

@@ -6,7 +6,5 @@
 #include "t_mykonos.h"
 
 char* chnage_frequenct_last_error();
-mykonosErr_t change_frequency(mykonosDevice_t *mykDevice,
-								uint64_t current_rx_freq, uint64_t new_rx_freq,
-								uint64_t current_tx_freq, uint64_t new_tx_freq);
+mykonosErr_t change_frequency(mykonosDevice_t *mykDevice, uint64_t new_rx_freq, uint64_t new_tx_freq);
 

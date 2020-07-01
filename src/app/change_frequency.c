@@ -11,10 +11,20 @@ char* chnage_frequenct_last_error()
 	return errorString;
 }
 
-mykonosErr_t change_frequency(mykonosDevice_t *mykDevice, 
-								uint64_t current_rx_freq, uint64_t new_rx_freq,
-								uint64_t current_tx_freq, uint64_t new_tx_freq)
+mykonosErr_t change_frequency(mykonosDevice_t *mykDevice, uint64_t new_rx_freq, uint64_t new_tx_freq)
 {
+	mykonosErr_t mykError;
+	uint64_t current_tx_freq, current_rx_freq;
+	if ((mykError = MYKONOS_getRfPllFrequency(mykDevice, TX_PLL, current_tx_freq)) != MYKONOS_ERR_OK)
+	{
+		errorString = getMykonosErrorMessage(mykError);
+	}
+
+	if ((mykError = MYKONOS_getRfPllFrequency(mykDevice, RX_PLL, current_rx_freq)) != MYKONOS_ERR_OK)
+	{
+		errorString = getMykonosErrorMessage(mykError);
+	}
+
 	if (((current_rx_freq == new_rx_freq) || (new_rx_freq == 0)) &&
 		((current_tx_freq == new_rx_freq) || (new_tx_freq == 0)))
 	{
@@ -82,7 +92,7 @@ mykonosErr_t small_change_frequency(mykonosDevice_t *mykDevice, uint64_t new_rx_
 	else
 	{
 		errorString = "PLL not locked after 200 mSec";
-		return MYKONOS_ERR_FAILED;
+		//return MYKONOS_ERR_FAILED;
 	}
 
 	
@@ -153,7 +163,7 @@ mykonosErr_t large_change_frequency(mykonosDevice_t *mykDevice, uint64_t new_rx_
 	else
 	{
 		errorString = "PLL not locked after 200 mSec";
-		return MYKONOS_ERR_FAILED;
+		//return MYKONOS_ERR_FAILED;
 	}
 
 	//Rerun the initialization calibrations
